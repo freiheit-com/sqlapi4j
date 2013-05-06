@@ -1,0 +1,305 @@
+Examples
+========
+
+- more examples to make the transition easy
+- if you know sql, it's mainly syntax
+- you will be assisted by the IDE's code completion
+
+
+SELECT & WHERE
+--------------
+
+.SQL:
+--------------------------------------------------------------------------------
+SELECT * FROM person WHERE age > 18;
+--------------------------------------------------------------------------------
+.SQLAPI:
+--------------------------------------------------------------------------------
+dao.sql().select(PersonTable.TABLE.getColumns())
+         .where(PersonTable.AGE.gt(18));
+--------------------------------------------------------------------------------
+
+
+
+Aggregators (& return types)
+----------------------------
+
+- Aggregates return a single, fix type return value that will differ from the
+  column value's.
+- COUNT, AVG, SUM: return a single number
+- MAX, MIN: return the given type of the column
+
+.SQL:
+--------------------------------------------------------------------------------
+SELECT COUNT(*) FROM person;
+--------------------------------------------------------------------------------
+
+.SQLAPI:
+--------------------------------------------------------------------------------
+Long cnt = dao.sql().select(Sql.count(PersonTable.ID));
+--------------------------------------------------------------------------------
+
+
+
+Boolean Operators
+-----------------
+
+- conditions can be chained by the usual boolean operators
+- and is the standard and can be used by just passing several conditions
+
+.SQL:
+--------------------------------------------------------------------------------
+SELECT * FROM person WHERE age > 18 AND gender IS 'MALE';
+--------------------------------------------------------------------------------
+
+.SQLAPI:
+--------------------------------------------------------------------------------
+dao.sql().select(PersonTable.TABLE.getColumns())
+         .where(PersonTable.AGE.gt(18), PersonTable.GENDER.is(Gender.MALE));
+--------------------------------------------------------------------------------
+
+usage of OR
+~~~~~~~~~~~
+
+.SQL:
+--------------------------------------------------------------------------------
+SELECT * FROM person WHERE age > 18 OR gender IS 'MALE';
+--------------------------------------------------------------------------------
+
+.SQLAPI:
+--------------------------------------------------------------------------------
+dao.sql().select(PersonTable.TABLE.getColumns())
+         .where(Sql.or(PersonTable.AGE.gt(18),
+                       PersonTable.GENDER.is(Gender.MALE)));
+--------------------------------------------------------------------------------
+
+
+
+Comparisons
+-----------
+
+- the usual expressions are supported e.g.:
+- eq, lt, gt, isNull, isNotNull
+- IN can be also used with a subquery (see below)
+
+.SQL:
+--------------------------------------------------------------------------------
+SELECT * FROM person WHERE email IS NULL;
+--------------------------------------------------------------------------------
+
+.SQLAPI:
+--------------------------------------------------------------------------------
+dao.sql().select(PersonTable.TABLE.getColumns())
+         .where(PersonTable.EMAIL.isNull());
+--------------------------------------------------------------------------------
+
+
+
+DISTINCT
+--------
+
+- distinct can be used to modify the selected column and will reduce the list of
+  values returned
+
+.SQL:
+--------------------------------------------------------------------------------
+SELECT DISTINCT(age) FROM person;
+--------------------------------------------------------------------------------
+
+.SQLAPI:
+--------------------------------------------------------------------------------
+dao.sql().select(Sql.distinct(PersonTable.AGE));
+--------------------------------------------------------------------------------
+
+
+
+GROUP BY
+--------
+
+- results can be grouped and the returned result set will be changed accordingly
+- if the selected item is aggregated the returned value can be read directly
+
+.SQL:
+--------------------------------------------------------------------------------
+SELECT COUNT(age) FROM person GROUP BY age;
+--------------------------------------------------------------------------------
+
+.SQLAPI:
+--------------------------------------------------------------------------------
+dao.sql().select(Sql.count(PersonTable.AGE))
+         .from(PersonTable.TABLE)
+         .groupBy(PersonTable.AGE);
+--------------------------------------------------------------------------------
+
+Usage of custom result transformers
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+- if a more complex result should be read, a seperate result transformer for these
+  columns is needed.
+- this currently has the limitation that the read field must be a column of the
+  original table.
+
+.SQL:
+--------------------------------------------------------------------------------
+SELECT category, count(*) FROM person GROUP BY age;
+--------------------------------------------------------------------------------
+
+.SQLAPI:
+--------------------------------------------------------------------------------
+private static final ResultTransformer<Map.Entry<Category, Long>> COUNT_BY_CATEGORY_READER =
+  new ResultTransformer<Map.Entry<Category, Long>>() {
+    @Override
+    public Map.Entry<Category, Long> apply(final SqlResultRow row) {
+      return Maps.immutableEntry(row.get(PersonTable.CATEGORY),
+                                 row.get(Sql.count(PersonTable.ID)));
+    }
+  };
+
+dao.findAll(
+  COUNT_BY_CATEGORY_READER,
+  dao.sql()
+    .select(PersonTable.CATEGORY, Sql.count(PersonTable.ID))
+    .from(PersonTable.TABLE)
+    .groupBy(PersonTable.CATEGORY)
+);
+--------------------------------------------------------------------------------
+
+
+
+HAVING
+------
+
+- having reduces the number of results in grouped queries and works as usual
+
+.SQL:
+--------------------------------------------------------------------------------
+SELECT COUNT(age) FROM person GROUP BY age HAVING age > 18;
+--------------------------------------------------------------------------------
+
+.SQLAPI:
+--------------------------------------------------------------------------------
+dao.sql().select(Sql.count(PersonTable.AGE))
+         .from(PersonTable.TABLE)
+         .groupBy(PersonTable.AGE)
+         .having(PersonTable.AGE.gt(18));
+--------------------------------------------------------------------------------
+
+
+
+Subqueries
+----------
+
+- subqueries can be used, but are limited to one returned column in the subquery
+- additionally, the selected item can't be aggregated with a function that will
+  rename the column (e.g. count)
+
+.SQL:
+--------------------------------------------------------------------------------
+SELECT * FROM details WHERE person_id IN
+  (SELECT id FROM person WHERE age < 18);
+--------------------------------------------------------------------------------
+
+.SQLAPI:
+--------------------------------------------------------------------------------
+final SubQuery<PersonId> subQuery =
+  dao.sql().subQuery(PersonTable.ID)
+           .from(PersonTable.TABLE)
+           .where(PersonTable.AGE.lt(18));
+
+dao.sql().select(DetailsTable.TABLE.getColumns())
+         .from(DetailsTable.TABLE)
+         .where(DetailsTable.PERSON_ID.in(subQuery));
+--------------------------------------------------------------------------------
+
+
+Joins
+-----
+
+- simple OUTER joins can be easily stated by refering to two different tables in
+  the from part and connecting them via a where clause
+- however, self-joins are currently not supported and can't be expressed
+
+.SQL:
+--------------------------------------------------------------------------------
+SELECT count(d.id) FROM person p, details d
+                   WHERE d.person_id = p.id
+                   AND p.age < 18;
+--------------------------------------------------------------------------------
+
+.SQLAPI:
+--------------------------------------------------------------------------------
+dao.sql().select(Sql.count(DetailsTable.ID))
+         .from(PersonTable.TABLE, DetailsTable.TABLE)
+         .where(DetailsTable.PERSON_ID.eq(PersonTable.ID),
+                PersonTable.AGE.lt(18));
+--------------------------------------------------------------------------------
+
+Other joins
+~~~~~~~~~~~
+
+- other joins can be constructed by stating the type explicitly
+
+.SQL:
+--------------------------------------------------------------------------------
+SELECT count(d.id) FROM person p OUTER JOIN details d
+                   ON d.person_id = p.id
+                   WHERE p.age IS NULL;
+--------------------------------------------------------------------------------
+
+.SQLAPI:
+--------------------------------------------------------------------------------
+final FromDef join =
+  PersonTable.TABLE.leftOuterJoin(DetailsTable.TABLE)
+                   .on(PersonTable.ID, DetailsTable.PERSON_ID);
+
+dao.sql().select(Sql.count(DetailsTable.ID))
+         .from(join)
+         .where(PersonTable.AGE.isNull());
+--------------------------------------------------------------------------------
+
+
+UPDATE
+------
+
+.SQL:
+--------------------------------------------------------------------------------
+UPDATE person SET age = 18;
+--------------------------------------------------------------------------------
+
+.SQLAPI:
+--------------------------------------------------------------------------------
+dao.sql().update(PersonTable.TABLE)
+         .values(PersonTable.AGE.set(18));
+--------------------------------------------------------------------------------
+
+
+
+DELETE
+------
+
+.SQL:
+--------------------------------------------------------------------------------
+DELETE FROM person WHERE age < 18;
+--------------------------------------------------------------------------------
+
+.SQLAPI:
+--------------------------------------------------------------------------------
+dao.sql().delete(PersonTable.TABLE)
+         .where(PersonTable.AGE.lt(18))
+--------------------------------------------------------------------------------
+
+
+
+INSERT
+------
+
+.SQL:
+--------------------------------------------------------------------------------
+INSERT INTO person (age) VALUES (18);
+--------------------------------------------------------------------------------
+
+.SQLAPI:
+--------------------------------------------------------------------------------
+dao.sql().insert(PersonTable.TABLE)
+         .values(PersonTable.AGE.set(18))
+--------------------------------------------------------------------------------
