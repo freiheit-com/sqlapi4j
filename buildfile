@@ -1,5 +1,4 @@
-# Version number for this release: If you change this, remember to adjust the build.properties, too!
-VERSION_NUMBER = "0.13.0-SNAPSHOT"
+VERSION_NUMBER = "0.1.0"
 # Group identifier for your projects
 GROUP = "com.freiheit"
 COPYRIGHT = "freiheit.com technologies GmbH (2012)"
