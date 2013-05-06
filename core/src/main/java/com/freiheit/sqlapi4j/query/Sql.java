@@ -195,8 +195,6 @@ public class Sql {
 
     /**
      * Get a unique-version of the select list item
-     * @param col
-     * @return
      */
     public static <T> SelectListItem<T> distinct(final SelectListItem<T> col) {
         return new Aggregate<T>(AggregateFn.DISTINCT, col);

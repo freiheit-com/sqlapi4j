@@ -35,7 +35,6 @@ public final class IdColumnDef<T extends Id> extends ColumnDef<T> {
     /**
      * @param name the column name
      * @param cls the column type
-     * @param sequenceName the name of the sequence used to generate the values
      */
     public IdColumnDef(final String name, final Class<T> cls) {
         super(name, new IdDbType<T>(cls));

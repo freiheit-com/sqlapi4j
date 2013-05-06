@@ -32,7 +32,7 @@ import com.freiheit.sqlapi4j.query.statements.InsertStatement;
 import com.freiheit.sqlapi4j.query.statements.UpdateStatement;
 
 /**
- * Implementation of {@link StatementEnhancer} and {@link UpdateStatementModifier} that
+ * Implementation of {@link StatementEnhancer} that
  * adds creation and modification information to insert and update statements.
  *
  * All values are only inserted if the table has a corresponding column and the statement does not have an

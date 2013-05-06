@@ -55,7 +55,6 @@ import com.freiheit.sqlapi4j.query.impl.SqlBuilderImpl;
  *
  * @param <I> the Id type
  * @param <T> the BL value type
- * @param <C> the clock type
  */
 @ParametersAreNonnullByDefault
 public abstract class SingleTableDao<I, T> extends AbstractDao {
