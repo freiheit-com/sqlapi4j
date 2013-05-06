@@ -1,7 +1,5 @@
 sqlapi4j
-===============
-Carsten Luckmann <carsten.luckmann@freiheit.com>
-v0.7, December 2011
+========
 
 
 Introduction
@@ -20,7 +18,7 @@ safe (in contrast to, e. g., Hibernate criteria API) and even null safe,
 if you use JSR305 annotations and FindBugs.
 
 sqlapi4j-core
---------------------
+-------------
 
 Let's have a look at the following SQL table:
 
@@ -173,7 +171,7 @@ in most cases it is more desirable to use the convenience
 introduced by the sqlapi4j-dao package.
 
 sqlapi4j-dao
--------------------
+------------
 
 sqlapi4j-dao offers a bunch of convenience wrappers making the
 everyday life much easier.
