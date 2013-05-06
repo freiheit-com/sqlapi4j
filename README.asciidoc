@@ -185,16 +185,6 @@ handling, and of transforming the result rows into Java objects.
 First we make minor adjustments to the Person model:
 
 ---------------------------------------------------------------------------------------------------------------------------------------------------------------
-package com.example;
-import static com.example.PersonTable.TABLE;
-import static com.example.PersonTable.ID;
-import static com.example.PersonTable.GENDER;
-import static com.example.PersonTable.AGE;
-import static com.example.PersonTable.LAST_NAME;
-import static com.example.PersonTable.FIRST_NAME;
-
-// ...
-
 public class Person {
 
     public static enum Gender {
