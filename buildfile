@@ -13,7 +13,7 @@ COMPILE_LIBS = DEP_LOGGING,"com.google.code.findbugs:jsr305:jar:1.3.9","postgres
 TEST_LIBS = 'com.h2database:h2:jar:1.3.158'
 
 desc "The SQL API"
-define "fdc-sqlapi" do
+define "sqlapi4j" do
 
     project.version = VERSION_NUMBER
     project.group = GROUP

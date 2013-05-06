@@ -1,4 +1,4 @@
-freiheit-sqlapi
+sqlapi4j
 ===============
 Carsten Luckmann <carsten.luckmann@freiheit.com>
 v0.7, December 2011
@@ -13,13 +13,13 @@ nature of the database. This has repeatedly been a source of programmers'
 headache, and we think that it is wrong to ignore the technical nature of
 the database when working with the persistence layer.
 
-With freiheit-sqlapi we approach the problem from the database/SQL point
+With sqlapi4j we approach the problem from the database/SQL point
 of view. We create a DSL which we want to look and behave like plain SQL
 and thus follows the principle of least surprise. Our approach is type
 safe (in contrast to, e. g., Hibernate criteria API) and even null safe,
 if you use JSR305 annotations and FindBugs.
 
-freiheit-sqlapi-core
+sqlapi4j-core
 --------------------
 
 Let's have a look at the following SQL table:
@@ -168,14 +168,14 @@ try {
 
 As you might expect, this can lead to a lot of boilerplate code. Of
 course, you can tweak your connection and exception handling by
-directly accessing the core functionality of freiheit-sqlapi, but
+directly accessing the core functionality of sqlapi4j, but
 in most cases it is more desirable to use the convenience
-introduced by the freiheit-sqlapi-dao package.
+introduced by the sqlapi4j-dao package.
 
-freiheit-sqlapi-dao
+sqlapi4j-dao
 -------------------
 
-freiheit-sqlapi-dao offers a bunch of convenience wrappers making the
+sqlapi4j-dao offers a bunch of convenience wrappers making the
 everyday life much easier.
 
 AbstractDao
