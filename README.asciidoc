@@ -95,13 +95,13 @@ The mapping for this table and model is very simple:
 -----------------------------------------------------------------------------------------------------------------
 public class PersonTable {
 
-    public static final ColumnDef<Long>   ID         = ColumnDefs.long("id");
-    public static final ColumnDef<String> FIRST_NAME = ColumnDefs.varchar("first_name");
-    public static final ColumnDef<String> LAST_NAME  = ColumnDefs.varchar("last_name");
-    public static final ColumnDef<Integer> AGE       = ColumnDefs.integer("age");
-    public static final ColumnDef<Gender> GENDER     = ColumnDefs.enum("gender", Gender.class);
+    static final ColumnDef<Long>   ID         = ColumnDefs.long("id");
+    static final ColumnDef<String> FIRST_NAME = ColumnDefs.varchar("first_name");
+    static final ColumnDef<String> LAST_NAME  = ColumnDefs.varchar("last_name");
+    static final ColumnDef<Integer> AGE       = ColumnDefs.integer("age");
+    static final ColumnDef<Gender> GENDER     = ColumnDefs.enum("gender", Gender.class);
 
-    public static final TableDef TABLE = new TableDef("person", FIRST_NAME, LAST_NAME, AGE, GENDER);
+    static final TableDef TABLE = new TableDef("person", FIRST_NAME, LAST_NAME, AGE, GENDER);
 
 }
 -----------------------------------------------------------------------------------------------------------------
@@ -112,22 +112,31 @@ in the column mapping.
 Building SQL select statements is now very easy, especially if you know
 SQL:
 
--------------------------------------------------
+---------------------------------------------------------
+package com.example;
+import static com.example.PersonTable.TABLE;
+import static com.example.PersonTable.GENDER;
+import static com.example.PersonTable.AGE;
+import static com.example.PersonTable.LAST_NAME;
+import static com.example.PersonTable.FIRST_NAME;
+
+// ...
+
 // find all female entries
 final SqlCommand<SelectResult> command1 = SQL
-    .select(PersonTable.TABLE.getColumns())
-    .where(PersonTable.GENDER.eq(Gender.FEMALE));
+    .select(TABLE.getColumns())
+    .where(GENDER.eq(Gender.FEMALE));
 
 // find all entries with age greater than 18
 final SqlCommand<SelectResult> command2 = SQL
-    .select(PersonTable.TABLE.getColumns())
-    .where(PersonTable.AGE.gt(18))
-    .orderBy(PersonTable.LAST_NAME, PersonTable.FIRST_NAME);
+    .select(TABLE.getColumns())
+    .where(AGE.gt(18))
+    .orderBy(LAST_NAME, FIRST_NAME);
 
 // find the average age grouped by gender
 final SqlCommand<SelectResult> command3 = SQL
-    .select(PersonTable.GENDER, Sql.avg(PersonTable.AGE))
-    .groupBy(PersonTable.GENDER);
+    .select(GENDER, Sql.avg(AGE))
+    .groupBy(GENDER);
 ---------------------------------------------------------
 
 Well, while this looks astonishingly easy, there are some more details
@@ -178,6 +187,16 @@ handling, and of transforming the result rows into Java objects.
 First we make minor adjustments to the Person model:
 
 ---------------------------------------------------------------------------------------------------------------------------------------------------------------
+package com.example;
+import static com.example.PersonTable.TABLE;
+import static com.example.PersonTable.ID;
+import static com.example.PersonTable.GENDER;
+import static com.example.PersonTable.AGE;
+import static com.example.PersonTable.LAST_NAME;
+import static com.example.PersonTable.FIRST_NAME;
+
+// ...
+
 public class Person {
 
     public static enum Gender {
@@ -198,20 +217,6 @@ public class Person {
         }
 
     }
-
-    public static final ResultTransformer<Person> TRANSFORMER = new ResultTransformer<Person>() {
-
-        @Override
-        public Person apply(final SqlResultRow row) {
-            return new Person(
-                row.get(PersonTable.ID),
-                row.get(PersonTable.FIRST_NAME),
-                row.get(PersonTable.LAST_NAME),
-                row.get(PersonTable.AGE),
-                row.get(PersonTable.GENDER)
-            );
-        }
-    };
 
     @Nonnull private final PersonId id;
     @Nonnull private final String firstName;
@@ -260,13 +265,13 @@ and to the table mapping:
 -----------------------------------------------------------------------------------------------------------------
 public class PersonTable {
 
-    public static final PKColumnDef<PersonId>    ID         = new PKColumnDef<PKColumnDef>("id", PersonId.class, "person_seq");
-    public static final ColumnDef<String> FIRST_NAME = ColumnDefs.varchar("first_name");
-    public static final ColumnDef<String> LAST_NAME  = ColumnDefs.varchar("last_name");
-    public static final ColumnDef<Integer> AGE       = ColumnDefs.integer("age");
-    public static final ColumnDef<Gender> GENDER     = ColumnDefs.enum("gender", Gender.class);
+    static final PKColumnDef<PersonId>    ID         = new PKColumnDef<PKColumnDef>("id", PersonId.class, "person_seq");
+    static final ColumnDef<String> FIRST_NAME = ColumnDefs.varchar("first_name");
+    static final ColumnDef<String> LAST_NAME  = ColumnDefs.varchar("last_name");
+    static final ColumnDef<Integer> AGE       = ColumnDefs.integer("age");
+    static final ColumnDef<Gender> GENDER     = ColumnDefs.enum("gender", Gender.class);
 
-    public static final TableDef TABLE = new TableDef("person", FIRST_NAME, LAST_NAME, AGE, GENDER);
+    static final TableDef TABLE = new TableDef("person", FIRST_NAME, LAST_NAME, AGE, GENDER);
 
 }
 -----------------------------------------------------------------------------------------------------------------
@@ -274,15 +279,31 @@ public class PersonTable {
 The above SQL select statements now look like this:
 
 --------------------------------------------------------------------------------------------------
-final List<Person> females = dao.findAll(Person.TRANSFORMER,
-    PersonTable.TABLE,
-    PersonTable.GENDER.eq(Gender.FEMALE)
+public static final ResultTransformer<Person> TRANSFORMER = new ResultTransformer<Person>() {
+
+        @Override
+        public Person apply(final SqlResultRow row) {
+            return new Person(
+                row.get(ID),
+                row.get(FIRST_NAME),
+                row.get(LAST_NAME),
+                row.get(AGE),
+                row.get(GENDER)
+            );
+        }
+};
+
+// ... create dao instance ..
+
+final List<Person> females = dao.findAll(TRANSFORMER,
+    TABLE,
+    GENDER.eq(Gender.FEMALE)
 );
 
-final List<Person> over18 = dao.findAll(Person.TRANSFORMER, dao.sql()
-    .select(PersonTable.TABLE.getColumns())
-    .where(PersonTable.AGE.gt(18))
-    .orderBy(PersonTable.LAST_NAME, PersonTable.FIRST_NAME)
+final List<Person> over18 = dao.findAll(TRANSFORMER, dao.sql()
+    .select(TABLE.getColumns())
+    .where(AGE.gt(18))
+    .orderBy(LAST_NAME, FIRST_NAME)
 );
 --------------------------------------------------------------------------------------------------
 
@@ -297,11 +318,11 @@ at hand when you want to deviate from the defaults.
 The above SQL select statements now look like this:
 
 --------------------------------------------------------------------------------------------------
-final List<Person> females = dao.findAll(PersonTable.GENDER.eq(Gender.FEMALE);
+final List<Person> females = dao.findAll(GENDER.eq(Gender.FEMALE);
 
 final List<Person> over18 = dao.findAll(dao.sql()
-    .select(PersonTable.TABLE.getColumns())
-    .where(PersonTable.AGE.gt(18))
-    .orderBy(PersonTable.LAST_NAME, PersonTable.FIRST_NAME)
+    .select(TABLE.getColumns())
+    .where(AGE.gt(18))
+    .orderBy(LAST_NAME, FIRST_NAME)
 );
 --------------------------------------------------------------------------------------------------
