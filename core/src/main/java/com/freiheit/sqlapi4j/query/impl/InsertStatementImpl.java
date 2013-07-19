@@ -20,6 +20,7 @@ import java.util.List;
 
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 import com.freiheit.sqlapi4j.meta.TableDef;
 import com.freiheit.sqlapi4j.query.BooleanExpression;
@@ -35,9 +36,9 @@ public final class InsertStatementImpl implements InsertStatement {
 
     public InsertStatementImpl(
         @Nonnull final TableDef table,
-        @Nonnull final BooleanExpression whereCondition,
-        @CheckForNull final FromDef[] fromDefs,
-        @CheckForNull final List<ColumnAssignment<?>[]> values
+        @Nullable final BooleanExpression whereCondition,
+        @Nullable final FromDef[] fromDefs,
+        @Nonnull final List<ColumnAssignment<?>[]> values
     ) {
         super();
         _table = table;
@@ -47,27 +48,23 @@ public final class InsertStatementImpl implements InsertStatement {
     }
 
     @Override
-    @CheckForNull
     public FromDef[] getFromDefs() {
         return _fromDefs;
     }
 
 
     @Override
-    @Nonnull
     public List<ColumnAssignment<?>[]> getRows() {
         return _values;
     }
 
 
     @Override
-    @Nonnull
     public TableDef getTable() {
         return _table;
     }
 
     @Override
-    @CheckForNull
     public BooleanExpression getWhere() {
         return _whereCondition;
     }

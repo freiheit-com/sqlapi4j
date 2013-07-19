@@ -18,6 +18,7 @@ package com.freiheit.sqlapi4j.query.impl;
 
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 import com.freiheit.sqlapi4j.meta.TableDef;
 import com.freiheit.sqlapi4j.query.ColumnAssignment;
@@ -29,7 +30,7 @@ public final class UpdateStatementImpl implements UpdateStatement {
     @CheckForNull private final BooleanCombination _booleanCombination;
     @Nonnull private final TableDef _table;
 
-    public UpdateStatementImpl(final ColumnAssignment<?>[] values, final BooleanCombination booleanCombination, final TableDef table) {
+    public UpdateStatementImpl(@Nullable final ColumnAssignment<?>[] values, @Nullable final BooleanCombination booleanCombination, @Nonnull final TableDef table) {
         super();
         _values = values;
         _booleanCombination = booleanCombination;
@@ -37,13 +38,11 @@ public final class UpdateStatementImpl implements UpdateStatement {
     }
 
     @Override
-    @CheckForNull
     public ColumnAssignment<?>[] getColumnAssignments() {
         return _values;
     }
 
     @Override
-    @CheckForNull
     public BooleanCombination getCondition() {
         return _booleanCombination;
     }
