@@ -1,4 +1,4 @@
-VERSION_NUMBER = "0.1.2"
+VERSION_NUMBER = "0.2.0-SNAPSHOT"
 # Group identifier for your projects
 GROUP = "com.freiheit"
 COPYRIGHT = "freiheit.com technologies GmbH (2012)"
