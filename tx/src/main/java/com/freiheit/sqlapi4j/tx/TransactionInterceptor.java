@@ -26,7 +26,6 @@ import org.aopalliance.intercept.MethodInvocation;
 
 import com.freiheit.sqlapi4j.domain.exception.DataAccessException;
 
-// CSOFF:LineLength
 /**
  * A MethodInterceptor for "Transaction"-Annotated methods.
  * Please note that the recommended way to inject dependencies into an Interceptor
@@ -34,7 +33,8 @@ import com.freiheit.sqlapi4j.domain.exception.DataAccessException;
  * So remember to call {@link AbstractModule#requestInjection} when you use the injector
  * in a module! Example is {@link TransactionModule}.
  *
- * @see <a href="http://code.google.com/p/google-guice/wiki/AOP#Injecting_Interceptors">http://code.google.com/p/google-guice/wiki/AOP#Injecting_Interceptors</a>
+ * @see <a href="http://code.google.com/p/google-guice/wiki/AOP#Injecting_Interceptors"
+ *         >http://code.google.com/p/google-guice/wiki/AOP#Injecting_Interceptors</a>
  * @author Tom Vollerthun (tom.vollerthun@freiheit.com)
  * @author Klas Kalass (klas.kalass@freiheit.com)
  */
@@ -69,8 +69,16 @@ public class TransactionInterceptor implements MethodInterceptor {
         }
     }
 
+
     private EnhancedTransactionTemplate _transactionTemplate;
 
+    /**
+     * Needs to be populated before the interceptor can be used.
+     * @param transactionTemplate
+     */
+    public void setTransactionTemplate(final EnhancedTransactionTemplate transactionTemplate) {
+        _transactionTemplate = transactionTemplate;
+    }
 
 
     @Override
