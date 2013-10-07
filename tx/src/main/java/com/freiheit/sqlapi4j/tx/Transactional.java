@@ -25,6 +25,13 @@ import java.lang.annotation.Target;
 /**
  * Annotates all methods that should be executed within an annotation.
  *
+ * <p><b>IMPORTANT:</b> A transaction will only be automatically created if the annotated
+ * method is part of an instance created by guice. If it is part of a callback instance
+ * which was created with "new" and not with guice, the transactional annotation
+ * will not have an effect! You will need to use the TransactionTemplate in such cases.</p>
+ *
+ * @author Klas Kalass (klas.kalass@freiheit.com)
+ * @author Christoph Mewes (christohp.mewes@freiheit.com)
  * @author Tom Vollerthun (tom.vollerthun@freiheit.com)
  */
 @Target(ElementType.METHOD)
@@ -44,4 +51,12 @@ public @interface Transactional {
      */
     IsolationLevel isolation() default IsolationLevel.READ_COMMITTED;
 
+    /**
+     * <b>ATTENTION:</b> This setting will lead to a deadlock, if used within a transaction
+     * that touches one of the tables your new transaction wants to touch. Foreign-Key references
+     * are problematic as well.
+     *
+     * @return
+     */
+    boolean propagateNew() default false;
 }

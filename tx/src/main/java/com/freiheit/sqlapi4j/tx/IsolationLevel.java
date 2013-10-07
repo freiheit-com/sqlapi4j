@@ -20,18 +20,16 @@ import java.sql.Connection;
 
 /**
  * Map the Connection - Constants to an enum.
- * 
- * @author Philip Schwartau (philip.schwartau@freiheit.com)
  */
 public enum IsolationLevel {
-        READ_COMMITTED( Connection.TRANSACTION_READ_COMMITTED ),
-        READ_UNCOMMITTED( Connection.TRANSACTION_READ_UNCOMMITTED ),
-        REPEATABLE_READ( Connection.TRANSACTION_REPEATABLE_READ ),
-        SERIALIZABLE( Connection.TRANSACTION_SERIALIZABLE );
+    READ_COMMITTED(Connection.TRANSACTION_READ_COMMITTED),
+    READ_UNCOMMITTED(Connection.TRANSACTION_READ_UNCOMMITTED),
+    REPEATABLE_READ(Connection.TRANSACTION_REPEATABLE_READ),
+    SERIALIZABLE(Connection.TRANSACTION_SERIALIZABLE);
 
     private final int _intValue;
 
-    private IsolationLevel( final int intValue ) {
+    private IsolationLevel(final int intValue) {
         _intValue = intValue;
     }
 

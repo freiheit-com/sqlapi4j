@@ -16,20 +16,29 @@
  */
 package com.freiheit.sqlapi4j.tx;
 
-import java.sql.Connection;
+import java.util.concurrent.Callable;
 
+import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 
 /**
- * Provides database connections.
+ * Transaction template that propagates a new transaction.
  *
- * @author Tom Vollerthun (tom.vollerthun@freiheit.com)
+ * @author Klas Kalass (klas.kalass@freiheit.com)
+ *
  */
-public interface ConnectionProvider {
+public interface EnhancedTransactionTemplate {
 
     /**
-     * Get the connection on which the transaction is taking place.
+     * Executes the callback within a transaction, always creating a new Transaction and
+     * never reusing a surrounding transaction.
      */
-    @Nonnull
-    Connection getOrCreateConnection();
+    @CheckForNull
+    <T> T executePropagateNew(@Nonnull Callable<T> callback);
+
+    /**
+     * Executes the callback within a transaction, only creating a new Transaction if there is no surrounding transaction.
+     */
+    @CheckForNull
+    <T> T execute(@Nonnull Callable<T> callback);
 }

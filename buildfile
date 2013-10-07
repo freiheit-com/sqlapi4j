@@ -9,6 +9,7 @@ repositories.remote << "http://repo1.maven.org/maven2/"
 
 DEP_LOGGING = 'org.slf4j:slf4j-api:jar:1.6.1'
 COMPILE_LIBS = DEP_LOGGING,"com.google.code.findbugs:jsr305:jar:1.3.9","postgresql:postgresql:jar:8.3-603.jdbc4"
+COMPILE_LIBS_AOP = 'aopalliance:aopalliance:jar:1.0', COMPILE_LIBS
 TEST_LIBS = 'com.h2database:h2:jar:1.3.158'
 
 desc "The SQL API"
@@ -58,7 +59,7 @@ define "sqlapi4j" do
 
     desc "Tx - Transaction Support"
     define :tx, :base_dir => "tx" do
-        compile.with COMPILE_LIBS, project(:core), project(:domain)
+        compile.with COMPILE_LIBS_AOP, project(:core), project(:domain)
 
         directory _ :target, :core
         core_test = file "target/core/test-classes" => [ project(:core)._(:target, :test, :classes), _(:target, :core) ] do |task|
