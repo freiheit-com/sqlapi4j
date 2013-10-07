@@ -21,36 +21,36 @@ import com.freiheit.sqlapi4j.query.impl.ValueComparisonType;
 
 public class H2DbDialect extends BasicSqlDialect {
 
-	public H2DbDialect( ConverterRegistry parent) {
-		super( parent);
-	}
+    public H2DbDialect( ConverterRegistry parent) {
+        super( parent);
+    }
 
-	@Override
-	public void sequenceNextval( StringBuilder sb, String seqName) {
-		sb.append( "NEXTVAL('");
-		sb.append( seqName.toUpperCase());
-		sb.append( "')");
-	}
+    @Override
+    public void sequenceNextval( StringBuilder sb, String seqName) {
+        sb.append( "NEXTVAL('");
+        sb.append( seqName);
+        sb.append( "')");
+    }
 
-	@Override
-	public void addComparison( StringBuilder sb, ValueComparisonType cmpType, String colFqName, String quotedConvertedValue) {
-		switch( cmpType) {
-		case ILIKE:
-			sb.append( "UPPER(" + colFqName + ")");
-			addValueComp( sb, ValueComparisonType.LIKE);
-			sb.append( "UPPER(" + quotedConvertedValue + ")");
-			break;
-		default:
-			super.addComparison( sb, cmpType, colFqName, quotedConvertedValue);
-		}
-	}
+    @Override
+    public void addComparison( StringBuilder sb, ValueComparisonType cmpType, String colFqName, String quotedConvertedValue) {
+        switch( cmpType) {
+        case ILIKE:
+            sb.append( "UPPER(" + colFqName + ")");
+            addValueComp( sb, ValueComparisonType.LIKE);
+            sb.append( "UPPER(" + quotedConvertedValue + ")");
+            break;
+        default:
+            super.addComparison( sb, cmpType, colFqName, quotedConvertedValue);
+        }
+    }
 
-	@Override
-	public String sequenceNextvalCmd( String sequenceName ) {
-		return "select NEXTVAL('"+sequenceName.toUpperCase()+"') as value";
-	}
+    @Override
+    public String sequenceNextvalCmd( String sequenceName ) {
+        return "select NEXTVAL('" + sequenceName + "') as value";
+    }
 
-	@Override
+    @Override
     public void addIndexToUse(StringBuilder sb, String indexName,
             FromDef ... fromDefs) {
         // Unterstützt H2 nicht.
