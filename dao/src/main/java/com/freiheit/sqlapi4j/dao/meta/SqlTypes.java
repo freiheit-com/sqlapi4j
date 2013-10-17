@@ -55,6 +55,11 @@ public enum SqlTypes implements SqlType {
     BIGINT(Types.BIGINT, "BIGINT"),
 
     /**
+     * SMALLINT. Integral values with a smaller range than {@link SqlTypes#INTEGER} mostly precsion 5.
+     */
+    SMALLINT(Types.SMALLINT, "SMALLINT"),
+
+    /**
      * BOOLEAN. Boolean values.
      */
     BOOLEAN(Types.BOOLEAN, "BOOLEAN"),
