@@ -5,3 +5,10 @@
 /*/target/
 reports/
 .buildr.rb
+
+# IDEA generated project and module files
+*.iml
+*.ipr
+*.iws
+/*/*.iml
+

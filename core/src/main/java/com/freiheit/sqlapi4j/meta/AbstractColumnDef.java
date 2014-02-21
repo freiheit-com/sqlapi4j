@@ -99,6 +99,10 @@ public abstract class AbstractColumnDef<T> implements SelectListItem<T> {
         return _fqName;
     }
 
+    protected void setFqName(@Nonnull final String fqName) {
+        _fqName = fqName;
+    }
+
     private void assertTableSet() {
         if (_table == null) {
             throw new IllegalStateException(

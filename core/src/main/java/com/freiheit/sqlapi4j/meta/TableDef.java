@@ -148,4 +148,10 @@ public class TableDef implements FromDef {
 	public OnPart leftOuterJoin(@Nonnull final TableDef right) {
 	    return JoinDecl.makeLeftOuterJoin(this, right);
 	}
+
+    @Nonnull
+    public TableAlias alias(@Nonnull final String alias) {
+        return new TableAlias(this, alias);
+    }
+
 }

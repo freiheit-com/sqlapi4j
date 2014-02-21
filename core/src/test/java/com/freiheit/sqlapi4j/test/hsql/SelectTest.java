@@ -16,6 +16,7 @@
  */
 package com.freiheit.sqlapi4j.test.hsql;
 
+import com.freiheit.sqlapi4j.meta.TableAlias;
 import java.sql.Connection;
 import java.sql.SQLException;
 
@@ -46,6 +47,7 @@ public class SelectTest extends TestBase {
 	private static Object[][] RESULT_IEQ_COLUMN= new Object[][] { new Object[] { "David" }};
 	private static Object[][] RESULT_MULTIPLE= new Object[][] { new Object[] { "Mary", 158 }, new Object[] { "Ford", 158 } };
 	private static Object[][] RESULT_WHERE_IN= new Object[][] { new Object[] { "Mary", 158, Gender.FEMALE }, new Object[] { "Ford", 158, Gender.MALE } };
+	private static Object[][] RESULT_ALIAS= new Object[][] { new Object[] { "Ford", 4L, 1L } };
 	private static Object[][] RESULT_GROUP= new Object[][] { new Object[] { 158, 2l }, new Object[] { 170, 3l }, new Object[] { 173, 1l }, new Object[] {174, 1l}, new Object[] { 178, 1l } };
 	private static Object[][] RESULT_SUM= new Object[][] { new Object[] { 158, 7l }, new Object[] { 170, 13l }, new Object[] { 173, 7l }, new Object[] {174, 8l}, new Object[] { 178, 1l } };
 	private static Object[][] RESULT_SUBSELECT= new Object[][] { new Object[] { "Paul", 170 }, new Object[] { "Hans", 170 }, new Object[] { "Harry", 170 } };
@@ -66,6 +68,28 @@ public class SelectTest extends TestBase {
 	}
 
 	@Test
+	public void testSelectAlias() {
+        final TableAlias alias = Person.TABLE.alias("a");
+        final SqlCommand<SelectStatement> query= SQL.select( alias.forColumn(Person.NAME), alias.forColumn(Person.ID), Sql.count(alias.forColumn(Person.ID))).from(alias).where( alias.forColumn(Person.LASTNAME).eq("Prefect"));
+
+		TestDb.INSTANCE.executeSingle( new DbOperation<Void>() {
+			@Override
+			public Void execute( final Connection c) throws SQLException {
+				final SelectResult res= executeQuery(c, query);
+				assertResultSet( res, RESULT_ALIAS, "test-alias");
+				return null;
+			}
+		});
+	}
+
+    @Test
+    public void testAliasCaching() {
+        final TableAlias alias = Person.TABLE.alias("a");
+        Assert.assertTrue(alias.forColumn(Person.NAME) == alias.forColumn(Person.NAME));
+        Assert.assertTrue(alias.forColumn(Person.ID) == alias.forColumn(Person.ID));
+    }
+
+        @Test
 	public void testSubselect() {
 		final SqlCommand<SelectStatement> query= SQL.select( Person.NAME, Person.HEIGTH).from( Person.TABLE).where( Person.ID.in( SQL.subSelect( Person.ID).from( Person.TABLE).where( Person.HEIGTH.eq( 170)))).orderBy( Person.ID);
 
