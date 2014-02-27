@@ -176,11 +176,29 @@ public abstract class AbstractColumnDef<T> implements SelectListItem<T> {
 
 	/**
 	 * Yields a condition suitable for use in WHERE and HAVING clauses.
+	 * Returns <code>true</code> if and only if the column's value is less than the value in the given column.
+	 */
+	@Nonnull
+	public BooleanExpression lt(final AbstractColumnDef<T> other) {
+		return Sql.lt( this, other);
+	}
+
+	/**
+	 * Yields a condition suitable for use in WHERE and HAVING clauses.
 	 * Returns <code>true</code> if and only if the column's value is less than or equal to the parameter value.
 	 */
 	@Nonnull
 	public BooleanExpression le(final T value) {
 		return Sql.le( this, value);
+	}
+
+	/**
+	 * Yields a condition suitable for use in WHERE and HAVING clauses.
+	 * Returns <code>true</code> if and only if the column's value is less than or equal to the value in the given column.
+	 */
+	@Nonnull
+	public BooleanExpression le(final AbstractColumnDef<T> other) {
+		return Sql.le( this, other);
 	}
 
 	/**
@@ -194,11 +212,29 @@ public abstract class AbstractColumnDef<T> implements SelectListItem<T> {
 
 	/**
 	 * Yields a condition suitable for use in WHERE and HAVING clauses.
+	 * Returns <code>true</code> if and only if the column's value is greater than the value in the given column.
+	 */
+	@Nonnull
+	public BooleanExpression gt(final AbstractColumnDef<T> other) {
+		return Sql.gt( this, other);
+	}
+
+	/**
+	 * Yields a condition suitable for use in WHERE and HAVING clauses.
 	 * Returns <code>true</code> if and only if the column's value is greater than or equal to the parameter value.
 	 */
 	@Nonnull
 	public BooleanExpression ge(final T value) {
 		return Sql.ge( this, value);
+	}
+
+	/**
+	 * Yields a condition suitable for use in WHERE and HAVING clauses.
+	 * Returns <code>true</code> if and only if the column's value is greater than or equal to the value in the given column.
+	 */
+	@Nonnull
+	public BooleanExpression ge(final AbstractColumnDef<T> other) {
+		return Sql.ge( this, other);
 	}
 
 	public SelectListItem<T> distinct() {

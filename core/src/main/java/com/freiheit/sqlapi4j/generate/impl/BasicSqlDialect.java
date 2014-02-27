@@ -68,8 +68,14 @@ public abstract class BasicSqlDialect implements SqlDialect {
 		case LT:
 			sb.append( "<");
 			break;
+		case LE:
+			sb.append( "<=");
+			break;
 		case GT:
 			sb.append( ">");
+			break;
+		case GE:
+			sb.append( ">=");
 			break;
 		case LIKE:
 			sb.append( " like ");

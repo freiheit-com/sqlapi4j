@@ -20,7 +20,9 @@ public enum ValueComparisonType {
 	EQ,
 	IEQ,
 	LT,
+	LE,
 	GT,
+	GE,
 	LIKE,
 	ILIKE,
 
