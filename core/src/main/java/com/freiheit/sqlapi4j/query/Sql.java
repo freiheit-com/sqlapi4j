@@ -128,6 +128,14 @@ public class Sql {
 	}
 
 	/**
+	 * This method creates a condition filtering only those rows whose value in column col is less than the value in column other.
+	 */
+    @Nonnull
+	public static <T> BooleanExpression lt(final SelectListItem<T> col, final SelectListItem<T> other) {
+		return new Column2ColumnComparison<T>( ValueComparisonType.LT, col, other);
+	}
+
+	/**
 	 * This method creates a condition filtering only those rows whose value in column col is less than or equal to the parameter value.
 	 */
     @Nonnull
@@ -135,7 +143,15 @@ public class Sql {
 		return new Not(new ColumnGreaterThan<T>( col, value));
 	}
 
-	/**
+    /**
+     * This method creates a condition filtering only those rows whose value in column col is less than or equal to the value in column other.
+     */
+    @Nonnull
+    public static <T> BooleanExpression le(final SelectListItem<T> col, final SelectListItem<T> other) {
+        return new Column2ColumnComparison<T>( ValueComparisonType.LE, col, other);
+    }
+
+    /**
 	 * This method creates a condition filtering only those rows whose value in column col is greater than the parameter value.
 	 */
     @Nonnull
@@ -143,7 +159,15 @@ public class Sql {
 		return new ColumnGreaterThan<T>( col, value);
 	}
 
-	/**
+    /**
+     * This method creates a condition filtering only those rows whose value in column col is less than the value in column other.
+     */
+    @Nonnull
+    public static <T> BooleanExpression gt(final SelectListItem<T> col, final SelectListItem<T> other) {
+        return new Column2ColumnComparison<T>( ValueComparisonType.GT, col, other);
+    }
+
+    /**
 	 * This method creates a condition filtering only those rows whose value in column col is greater than or equal to the parameter value.
 	 */
     @Nonnull
@@ -151,7 +175,15 @@ public class Sql {
 		return new Not( new ColumnLessThan<T>( col, value));
 	}
 
-	/**
+    /**
+     * This method creates a condition filtering only those rows whose value in column col is less than or equal to the value in column other.
+     */
+    @Nonnull
+    public static <T> BooleanExpression ge(final SelectListItem<T> col, final SelectListItem<T> other) {
+        return new Column2ColumnComparison<T>( ValueComparisonType.GE, col, other);
+    }
+
+    /**
 	 * This method creates a condition filtering only those rows whose value in column col matches the pattern of the parameter value.
 	 * Pattern matching is case sensitive.
 	 */

@@ -45,13 +45,16 @@ public class SelectTest extends TestBase {
 	private static Object[][] RESULT_LIKE= new Object[][] { new Object[] { "Peter", 178 }, new Object[] { "Paul", 170 } };
 	private static Object[][] RESULT_IEQ= new Object[][] { new Object[] { "Peter" }};
 	private static Object[][] RESULT_IEQ_COLUMN= new Object[][] { new Object[] { "David" }};
+	private static Object[][] RESULT_GT_COLUMN= new Object[][] { new Object[] { "Berlin" }, new Object[] { "David" }, new Object[] { "Ford" }, new Object[] { "Hans" }, new Object[] { "Harry" }, new Object[] { "Mary" }};
+	private static Object[][] RESULT_GE_COLUMN= new Object[][] { new Object[] { "Berlin" }, new Object[] { "David" }, new Object[] { "Ford" }, new Object[] { "Hans" }, new Object[] { "Harry" }, new Object[] { "Mary" }};
+	private static Object[][] RESULT_LT_COLUMN= new Object[][] { new Object[] { "Paul" }, new Object[] { "Peter" }};
+	private static Object[][] RESULT_LE_COLUMN= new Object[][] { new Object[] { "Paul" }, new Object[] { "Peter" }};
 	private static Object[][] RESULT_MULTIPLE= new Object[][] { new Object[] { "Mary", 158 }, new Object[] { "Ford", 158 } };
 	private static Object[][] RESULT_WHERE_IN= new Object[][] { new Object[] { "Mary", 158, Gender.FEMALE }, new Object[] { "Ford", 158, Gender.MALE } };
 	private static Object[][] RESULT_ALIAS= new Object[][] { new Object[] { "Ford", 4L, 1L } };
 	private static Object[][] RESULT_GROUP= new Object[][] { new Object[] { 158, 2l }, new Object[] { 170, 3l }, new Object[] { 173, 1l }, new Object[] {174, 1l}, new Object[] { 178, 1l } };
 	private static Object[][] RESULT_SUM= new Object[][] { new Object[] { 158, 7l }, new Object[] { 170, 13l }, new Object[] { 173, 7l }, new Object[] {174, 8l}, new Object[] { 178, 1l } };
 	private static Object[][] RESULT_SUBSELECT= new Object[][] { new Object[] { "Paul", 170 }, new Object[] { "Hans", 170 }, new Object[] { "Harry", 170 } };
-
 
 	@Test
 	public void testSelectWhereIn() {
@@ -174,6 +177,70 @@ public class SelectTest extends TestBase {
                final SelectResult res= executeQuery(c, query);
                System.out.println("result is:");
                assertResultSet( res, RESULT_IEQ_COLUMN, "ieq-column-results");
+               return null;
+           }
+       });
+   }
+
+   @Test
+   public void testSelectGtColumn() {
+       final SqlCommand<SelectStatement> query= SQL.select( Person.NAME ).from( Person.TABLE ).where( Person.LASTNAME.gt(Person.NAME)).orderBy( Person.NAME);
+       System.out.println( query);
+
+       TestDb.INSTANCE.executeSingle( new DbOperation<Void>() {
+           @Override
+           public Void execute( final Connection c) throws SQLException {
+               final SelectResult res= executeQuery(c, query);
+               System.out.println("result is:");
+               assertResultSet( res, RESULT_GT_COLUMN, "gt-column-results");
+               return null;
+           }
+       });
+   }
+
+   @Test
+   public void testSelectGeColumn() {
+       final SqlCommand<SelectStatement> query= SQL.select( Person.NAME ).from( Person.TABLE ).where( Person.LASTNAME.ge(Person.NAME)).orderBy( Person.NAME);
+       System.out.println( query);
+
+       TestDb.INSTANCE.executeSingle( new DbOperation<Void>() {
+           @Override
+           public Void execute( final Connection c) throws SQLException {
+               final SelectResult res= executeQuery(c, query);
+               System.out.println("result is:");
+               assertResultSet( res, RESULT_GE_COLUMN, "ge-column-results");
+               return null;
+           }
+       });
+   }
+
+   @Test
+   public void testSelectLtColumn() {
+       final SqlCommand<SelectStatement> query= SQL.select( Person.NAME ).from( Person.TABLE ).where( Person.LASTNAME.lt(Person.NAME)).orderBy( Person.NAME);
+       System.out.println( query);
+
+       TestDb.INSTANCE.executeSingle( new DbOperation<Void>() {
+           @Override
+           public Void execute( final Connection c) throws SQLException {
+               final SelectResult res= executeQuery(c, query);
+               System.out.println("result is:");
+               assertResultSet( res, RESULT_LT_COLUMN, "lt-column-results");
+               return null;
+           }
+       });
+   }
+
+   @Test
+   public void testSelectLeColumn() {
+       final SqlCommand<SelectStatement> query= SQL.select( Person.NAME ).from( Person.TABLE ).where( Person.LASTNAME.le(Person.NAME)).orderBy( Person.NAME);
+       System.out.println( query);
+
+       TestDb.INSTANCE.executeSingle( new DbOperation<Void>() {
+           @Override
+           public Void execute( final Connection c) throws SQLException {
+               final SelectResult res= executeQuery(c, query);
+               System.out.println("result is:");
+               assertResultSet( res, RESULT_LE_COLUMN, "le-column-results");
                return null;
            }
        });
