@@ -29,4 +29,9 @@ public interface FromDef {
     @Nonnull
 	String getTableName();
 
+    /**
+     * Accepts a {@link com.freiheit.sqlapi4j.query.FromDefVisitor}.
+     */
+    <T> T accept(@Nonnull FromDefVisitor<T> visitor);
+
 }

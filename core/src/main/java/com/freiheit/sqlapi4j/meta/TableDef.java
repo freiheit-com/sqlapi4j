@@ -16,16 +16,17 @@
  */
 package com.freiheit.sqlapi4j.meta;
 
+import com.freiheit.sqlapi4j.generate.SqlDialect;
+import com.freiheit.sqlapi4j.query.FromDef;
+import com.freiheit.sqlapi4j.query.FromDefVisitor;
+import com.freiheit.sqlapi4j.query.impl.JoinDecl;
+import com.freiheit.sqlapi4j.query.impl.OnPart;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import javax.annotation.Nonnull;
 import javax.annotation.ParametersAreNonnullByDefault;
-
-import com.freiheit.sqlapi4j.query.FromDef;
-import com.freiheit.sqlapi4j.query.impl.JoinDecl;
-import com.freiheit.sqlapi4j.query.impl.OnPart;
 
 /**
  * Metadata for a database table.
@@ -85,7 +86,6 @@ public class TableDef implements FromDef {
 		return _columns;
 	}
 
-	@Override
 	public String getTableName() {
 		return _tableName;
 	}
@@ -152,6 +152,10 @@ public class TableDef implements FromDef {
     @Nonnull
     public TableAlias alias(@Nonnull final String alias) {
         return new TableAlias(this, alias);
+    }
+
+    public <T> T accept(@Nonnull final FromDefVisitor<T> visitor) {
+        return visitor.visit(this);
     }
 
 }

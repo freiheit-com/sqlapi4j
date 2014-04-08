@@ -16,31 +16,19 @@
  */
 package com.freiheit.sqlapi4j.test.hsql;
 
+import com.freiheit.sqlapi4j.generate.impl.ConverterRegistry;
+import com.freiheit.sqlapi4j.generate.impl.H2DbDialect;
+import com.freiheit.sqlapi4j.query.*;
+import com.freiheit.sqlapi4j.query.impl.SqlBuilderImpl;
+import com.freiheit.sqlapi4j.query.impl.SqlExecutorImpl;
+import com.freiheit.sqlapi4j.query.statements.*;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.Iterator;
-
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
-
-import com.freiheit.sqlapi4j.generate.impl.ConverterRegistry;
-import com.freiheit.sqlapi4j.generate.impl.H2DbDialect;
-import com.freiheit.sqlapi4j.query.BooleanExpression;
-import com.freiheit.sqlapi4j.query.SelectResult;
-import com.freiheit.sqlapi4j.query.Sql;
-import com.freiheit.sqlapi4j.query.SqlBuilder;
-import com.freiheit.sqlapi4j.query.SqlCommand;
-import com.freiheit.sqlapi4j.query.SqlExecutor;
-import com.freiheit.sqlapi4j.query.SqlResultRow;
-import com.freiheit.sqlapi4j.query.impl.SqlBuilderImpl;
-import com.freiheit.sqlapi4j.query.impl.SqlExecutorImpl;
-import com.freiheit.sqlapi4j.query.statements.CreateTableStatement;
-import com.freiheit.sqlapi4j.query.statements.InsertStatement;
-import com.freiheit.sqlapi4j.query.statements.SelectSequenceStatement;
-import com.freiheit.sqlapi4j.query.statements.SelectStatement;
-import com.freiheit.sqlapi4j.query.statements.UpdateStatement;
 
 public class TestBase {
 
@@ -117,22 +105,24 @@ public class TestBase {
 		}
 	}
 
-	protected void assertEquals( final SqlResultRow sqlResultRow, final Object[] expected, final String msg) {
-		printComparison( sqlResultRow, expected);
-		final Iterator<?> cols= sqlResultRow.columns().iterator();
-		for( int i= 0; i < expected.length; ++i) {
-			if( !cols.hasNext()) {
-				failRow( sqlResultRow, expected, msg);
-			}
-			final Object value= cols.next();
-			if( !value.equals( expected[i])) {
-				failRow( sqlResultRow, expected, msg);
-			}
-		}
-		if( cols.hasNext()) {
-			failRow( sqlResultRow, expected, msg);
-		}
-	}
+    protected void assertEquals( final SqlResultRow sqlResultRow, final Object[] expected, final String msg) {
+        printComparison( sqlResultRow, expected);
+        final Iterator<?> cols= sqlResultRow.columns().iterator();
+        for( int i= 0; i < expected.length; ++i) {
+            if( !cols.hasNext()) {
+                failRow( sqlResultRow, expected, msg);
+            }
+            final Object value= cols.next();
+            if ((value == null) != (expected[i] == null) ||
+                (value != null &&  !value.equals(expected[i]))
+            ) {
+                failRow( sqlResultRow, expected, msg);
+            }
+        }
+        if( cols.hasNext()) {
+            failRow( sqlResultRow, expected, msg);
+        }
+    }
 
 	private static void failRow( final SqlResultRow sqlResultRow, final Object[] expected, final String msg) {
 		Assert.fail( msg + " expected " + Arrays.asList( expected) + " found " + sqlResultRow);
