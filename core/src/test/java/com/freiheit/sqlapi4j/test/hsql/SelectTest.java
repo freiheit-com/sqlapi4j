@@ -37,6 +37,8 @@ public class SelectTest extends TestBase {
 
 	private static Object[][] RESULT_SINGLE= new Object[][] { { "Ford" } };
 	private static Object[][] RESULT_JOIN= new Object[][] { { "Berlin" } };
+	private static Object[][] RESULT_LEFT_OUTER_JOIN= new Object[][] { { "Berlin", "Berlin" }, { "David", null }, { "Ford", null }, { "Hans", null }, { "Harry", null }, { "Mary", null }, { "Paul", null }, { "Peter", null } };
+	private static Object[][] RESULT_LEFT_OUTER_JOIN_WITH_ADDITIONAL_EXPR = new Object[][] { { "Berlin", null }, { "David", null }, { "Ford", null }, { "Hans", null }, { "Harry", null }, { "Mary", null }, { "Paul", null }, { "Peter", null } };
 	private static Object[][] RESULT_NOT_SINGLE= new Object[][] { { "Peter" }, { "Paul" }, { "Mary" }, { "Hans" }, { "Harry" }, { "Berlin" }, {"David"}};
 	//{ "Ford" },
 
@@ -327,6 +329,44 @@ public class SelectTest extends TestBase {
 			public Void execute( final Connection c) throws SQLException {
 				final SelectResult res= executeQuery(c, query);
 				assertResultSet( res, RESULT_JOIN, "join-result");
+                return null;
+			}
+		});
+	}
+
+	@Test
+	public void testLeftOuterJoin() {
+		final SqlCommand<SelectStatement> query =
+                SQL.select( Person.NAME, Address.CITY)
+                   .from( Person.TABLE.leftOuterJoin(Address.TABLE).on(Person.NAME, Address.CITY))
+                   .orderBy(Person.NAME);
+
+        System.out.println( EXEC.render(query.stmt()));
+
+		TestDb.INSTANCE.executeSingle( new DbOperation<Void>() {
+			@Override
+			public Void execute( final Connection c) throws SQLException {
+				final SelectResult res= executeQuery(c, query);
+				assertResultSet( res, RESULT_LEFT_OUTER_JOIN, "left-outer-join-result");
+                return null;
+			}
+		});
+	}
+
+	@Test
+	public void testLeftOuterJoinWithAdditionalExpression() {
+		final SqlCommand<SelectStatement> query =
+                SQL.select( Person.NAME, Address.CITY)
+                   .from( Person.TABLE.leftOuterJoin(Address.TABLE).on(Person.NAME, Address.CITY, Address.CITY.neq("Berlin")))
+                   .orderBy(Person.NAME);
+
+        System.out.println( EXEC.render(query.stmt()));
+
+		TestDb.INSTANCE.executeSingle( new DbOperation<Void>() {
+			@Override
+			public Void execute( final Connection c) throws SQLException {
+				final SelectResult res= executeQuery(c, query);
+				assertResultSet( res, RESULT_LEFT_OUTER_JOIN_WITH_ADDITIONAL_EXPR, "left-outer-join-with-additional-expr-result");
                 return null;
 			}
 		});

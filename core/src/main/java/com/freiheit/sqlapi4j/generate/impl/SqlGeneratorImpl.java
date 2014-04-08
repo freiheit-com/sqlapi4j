@@ -16,44 +16,18 @@
  */
 package com.freiheit.sqlapi4j.generate.impl;
 
+import com.freiheit.sqlapi4j.generate.SqlDialect;
+import com.freiheit.sqlapi4j.generate.SqlGenerator;
+import com.freiheit.sqlapi4j.meta.*;
+import com.freiheit.sqlapi4j.query.*;
+import com.freiheit.sqlapi4j.query.Sql.*;
+import com.freiheit.sqlapi4j.query.impl.*;
+import com.freiheit.sqlapi4j.query.statements.SelectStatement;
 import java.util.Iterator;
 import java.util.List;
 
 import javax.annotation.CheckForNull;
-
-import com.freiheit.sqlapi4j.generate.SqlDialect;
-import com.freiheit.sqlapi4j.generate.SqlGenerator;
-import com.freiheit.sqlapi4j.meta.AbstractColumnDef;
-import com.freiheit.sqlapi4j.meta.ColumnConverter;
-import com.freiheit.sqlapi4j.meta.DbType;
-import com.freiheit.sqlapi4j.meta.TableDef;
-import com.freiheit.sqlapi4j.query.BooleanExpression;
-import com.freiheit.sqlapi4j.query.BooleanExpressionVisitor;
-import com.freiheit.sqlapi4j.query.Column2ColumnAssignment;
-import com.freiheit.sqlapi4j.query.ColumnAssignment;
-import com.freiheit.sqlapi4j.query.ColumnValueAssignment;
-import com.freiheit.sqlapi4j.query.FromDef;
-import com.freiheit.sqlapi4j.query.SelectListItem;
-import com.freiheit.sqlapi4j.query.Sql.And;
-import com.freiheit.sqlapi4j.query.Sql.BooleanCombination;
-import com.freiheit.sqlapi4j.query.Sql.ColumnComparisonOperation;
-import com.freiheit.sqlapi4j.query.Sql.ColumnEquals;
-import com.freiheit.sqlapi4j.query.Sql.ColumnEqualsIgnoreCase;
-import com.freiheit.sqlapi4j.query.Sql.ColumnGreaterThan;
-import com.freiheit.sqlapi4j.query.Sql.ColumnLessThan;
-import com.freiheit.sqlapi4j.query.Sql.InSubselectExpression;
-import com.freiheit.sqlapi4j.query.Sql.InValuesExpression;
-import com.freiheit.sqlapi4j.query.Sql.IsNotNull;
-import com.freiheit.sqlapi4j.query.Sql.IsNull;
-import com.freiheit.sqlapi4j.query.Sql.Not;
-import com.freiheit.sqlapi4j.query.Sql.Or;
-import com.freiheit.sqlapi4j.query.Sql.PairInExpression;
-import com.freiheit.sqlapi4j.query.Sql.ParameterPair;
-import com.freiheit.sqlapi4j.query.impl.Column2ColumnComparison;
-import com.freiheit.sqlapi4j.query.impl.ColumnComparison;
-import com.freiheit.sqlapi4j.query.impl.ResultFlags;
-import com.freiheit.sqlapi4j.query.impl.ValueComparisonType;
-import com.freiheit.sqlapi4j.query.statements.SelectStatement;
+import javax.annotation.Nonnull;
 
 public class SqlGeneratorImpl implements SqlGenerator {
 
@@ -77,7 +51,7 @@ public class SqlGeneratorImpl implements SqlGenerator {
             dialect.addIndexToUse(sb, indexName, fromDefs);
         }
 		addSelectListItems( dialect, sb, syntax.getSelectItems());
-		addFromPart( dialect, syntax.getFromDef(), sb);
+		addFromPart( dialect, syntax.getFromDef(), sb, preparedStatementData);
 		final BooleanExpression where= syntax.getWhere();
 		if( where != null) {
 			dialect.addWhere( sb);
@@ -348,7 +322,7 @@ public class SqlGeneratorImpl implements SqlGenerator {
 			//dialect.addOpenParenthese( sb);
 			addRhsOfColumnAssignments( dialect, sb, assignmentList.get( 0), preparedStatementData);
 			//dialect.addCloseParenthese( sb);
-			addFromPart( dialect, fromDefs, sb);
+			addFromPart( dialect, fromDefs, sb, preparedStatementData);
 			if( where != null) {
 				dialect.addWhere( sb);
 				final BuildBooleanExpressionsClauseVisitor visitor= new BuildBooleanExpressionsClauseVisitor( preparedStatementData, sb, dialect);
@@ -439,13 +413,59 @@ public class SqlGeneratorImpl implements SqlGenerator {
 		return dialect.sequenceNextvalCmd( sequenceName );
 	}
 
-	private static void addFromPart( final SqlDialect dialect, final FromDef[] fromDefs, final StringBuilder sb) {
+	private void addFromPart(final SqlDialect dialect, final FromDef[] fromDefs, final StringBuilder sb, final PreparedStatementData preparedStatementData) {
 		dialect.addFrom( sb);
 		final int fromDefLength= fromDefs.length;
 		for( int i= 0; i < fromDefLength; ++i) {
 			final FromDef fromDef= fromDefs[i];
-			sb.append( fromDef.getTableName());
-			if( i < fromDefLength - 1) {
+
+            fromDef.accept(new FromDefVisitor<Void>() {
+                public Void visit(@Nonnull final TableDef tableDef) {
+                    sb.append( fromDef.getTableName());
+                    return null;
+                }
+
+                public Void visit(@Nonnull final JoinDecl joinDecl) {
+
+                    sb.append(joinDecl.getTable1().getTableName());
+
+                    switch (joinDecl.getJoinType()) {
+                        case LEFT_OUTER_JOIN: dialect.addLeftOuterJoin(sb); break;
+                        case RIGHT_OUTER_JOIN: dialect.addRightOuterJoin(sb); break;
+                        case INNER_JOIN: dialect.addInnerJoin(sb); break;
+                        case FULL_OUTER_JOIN: dialect.addFullOuterJoin(sb); break;
+                        default: throw new UnsupportedOperationException();
+                    }
+
+                    sb.append(joinDecl.getTable2().getTableName());
+                    dialect.addJoinOn(sb);
+
+                    final BooleanExpression simpleJoinExpr = eqForce(joinDecl.getColumn1(), joinDecl.getColumn2());
+                    final BooleanExpression joinExpr = joinDecl.getAdditionalExpr() == null
+                            ? simpleJoinExpr
+                            : Sql.and(simpleJoinExpr, joinDecl.getAdditionalExpr());
+
+                    joinExpr.accept(new BuildBooleanExpressionsClauseVisitor( preparedStatementData, sb, dialect));
+
+                    return null;
+                }
+
+                public Void visit(@Nonnull final TableAlias tableAlias) {
+                    sb.append( fromDef.getTableName());
+                    return null;
+                }
+
+                /**
+                 * Force comparison of columns of unknown types.
+                 * TODO: Remove necessity to force the comparison.
+                 */
+                private <T> BooleanExpression eqForce(AbstractColumnDef col1, AbstractColumnDef col2) {
+                    return Sql.eq((AbstractColumnDef<T>)col1, (AbstractColumnDef<T>)col2);
+                }
+            });
+
+
+            if (i < fromDefLength - 1) {
                 dialect.addSelectListSeparator( sb);
             }
 		}

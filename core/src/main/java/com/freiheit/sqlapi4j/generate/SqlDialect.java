@@ -103,4 +103,13 @@ public interface SqlDialect {
      */
     boolean supportsRowValueConstructorSyntaxInInList();
 
+    void addJoinOn(@Nonnull StringBuilder sb);
+
+    void addLeftOuterJoin(@Nonnull StringBuilder sb);
+
+    void addRightOuterJoin(@Nonnull StringBuilder sb);
+
+    void addFullOuterJoin(@Nonnull StringBuilder sb);
+
+    void addInnerJoin(@Nonnull StringBuilder sb);
 }

@@ -16,7 +16,9 @@
  */
 package com.freiheit.sqlapi4j.meta;
 
+import com.freiheit.sqlapi4j.generate.SqlDialect;
 import com.freiheit.sqlapi4j.query.FromDef;
+import com.freiheit.sqlapi4j.query.FromDefVisitor;
 import java.util.concurrent.ConcurrentHashMap;
 
 import javax.annotation.Nonnull;
@@ -82,6 +84,10 @@ public class TableAlias implements FromDef {
         }
         aliasCol.setTable(_tableDef);
         return aliasCol;
+    }
+
+    public <T> T accept(@Nonnull final FromDefVisitor<T> visitor) {
+        return visitor.visit(this);
     }
 
 }

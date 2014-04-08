@@ -25,6 +25,8 @@ import com.freiheit.sqlapi4j.meta.DbType;
 import com.freiheit.sqlapi4j.query.clause.LockMode;
 import com.freiheit.sqlapi4j.query.impl.ValueComparisonType;
 
+import javax.annotation.Nonnull;
+
 public abstract class BasicSqlDialect implements SqlDialect {
 
 	PsqlStdConverter _stdConverter= new PsqlStdConverter();
@@ -261,4 +263,23 @@ public abstract class BasicSqlDialect implements SqlDialect {
 		return "";
 	}
 
+    public void addJoinOn(@Nonnull final StringBuilder sb) {
+        sb.append(" ON ");
+    }
+
+    public void addLeftOuterJoin(@Nonnull final StringBuilder sb) {
+        sb.append(" LEFT OUTER JOIN ");
+    }
+
+    public void addRightOuterJoin(@Nonnull final StringBuilder sb) {
+        sb.append(" RIGHT OUTER JOIN ");
+    }
+
+    public void addFullOuterJoin(@Nonnull final StringBuilder sb) {
+        sb.append(" FULL OUTER JOIN ");
+    }
+
+    public void addInnerJoin(@Nonnull final StringBuilder sb) {
+        sb.append(" INNER JOIN ");
+    }
 }

@@ -16,31 +16,40 @@
  */
 package com.freiheit.sqlapi4j.query.impl;
 
+import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import com.freiheit.sqlapi4j.generate.SqlDialect;
+import com.freiheit.sqlapi4j.generate.SqlGenerator;
 import com.freiheit.sqlapi4j.meta.AbstractColumnDef;
 import com.freiheit.sqlapi4j.meta.TableDef;
+import com.freiheit.sqlapi4j.query.BooleanExpression;
+import com.freiheit.sqlapi4j.query.BooleanExpressionVisitor;
 import com.freiheit.sqlapi4j.query.FromDef;
+import com.freiheit.sqlapi4j.query.FromDefVisitor;
 
 public class JoinDecl implements FromDef, OnPart {
 
     private final JoinType _joinType;
 	private final TableDef _table1;
-	private AbstractColumnDef<?> _column1;
+    private BooleanExpression _additionalExpr;
+    private AbstractColumnDef<?> _column1;
 	private final TableDef _table2;
 	private AbstractColumnDef<?> _column2;
 
-	private JoinDecl(@Nonnull final JoinType joinType,
+    private JoinDecl(@Nonnull final JoinType joinType,
 	                 @Nonnull final TableDef table1,
 	                 @Nullable final AbstractColumnDef<?> column1,
 	                 @Nullable final TableDef table2,
-	                 @Nullable final AbstractColumnDef<?> column2) {
+	                 @Nullable final AbstractColumnDef<?> column2,
+                     @Nullable final BooleanExpression additionalExpr) {
 		_joinType= joinType;
 		_table1= table1;
 		_column1= column1;
 		_table2= table2;
 		_column2= column2;
+        _additionalExpr = additionalExpr;
 	}
 
     @Nonnull
@@ -48,7 +57,7 @@ public class JoinDecl implements FromDef, OnPart {
         if (left.equals(right)) {
             throw new IllegalArgumentException("self-joins are not yet supported and will result in runtime errors.");
         }
-        return new JoinDecl(JoinType.LEFT_OUTER_JOIN, left, null, right, null);
+        return new JoinDecl(JoinType.LEFT_OUTER_JOIN, left, null, right, null, null);
     }
 
     @Override
@@ -56,6 +65,15 @@ public class JoinDecl implements FromDef, OnPart {
     public FromDef on(final AbstractColumnDef<?> left, final AbstractColumnDef<?> right) {
         _column1 = left;
         _column2 = right;
+        return this;
+    }
+
+    @Override
+    @Nonnull
+    public FromDef on(final AbstractColumnDef<?> left, final AbstractColumnDef<?> right, final BooleanExpression additionalExpr) {
+        _column1 = left;
+        _column2 = right;
+        _additionalExpr = additionalExpr;
         return this;
     }
 
@@ -84,22 +102,17 @@ public class JoinDecl implements FromDef, OnPart {
         return _column2;
     }
 
-    @Override
-	public String getTableName() {
-		String typeString;
+    @CheckForNull
+    public BooleanExpression getAdditionalExpr() {
+        return _additionalExpr;
+    }
 
-		//FIXME (CM): https://github.com/greenhornet/freiheit_sqlapi/issues/10
-		// Put into dialect?
-		switch (_joinType){
-		case LEFT_OUTER_JOIN: typeString = " LEFT OUTER JOIN "; break;
-		case RIGHT_OUTER_JOIN: typeString = " RIGHT OUTER JOIN "; break;
-		case INNER_JOIN: typeString = " INNER JOIN "; break;
-		case FULL_OUTER_JOIN: typeString = " FULL OUTER JOIN "; break;
-		default: throw new UnsupportedOperationException();
-		}
+    @Nonnull
+    public String getTableName() {
+        throw new UnsupportedOperationException("getTableName() not supported for JoinDecl.");
+    }
 
-
-        return _table1.getTableName() + typeString + _table2.getTableName() +
-                " ON " + _column1.fqName() + " = " + _column2.fqName();
-	}
+    public <T> T accept(@Nonnull final FromDefVisitor<T> visitor) {
+        return visitor.visit(this);
+    }
 }

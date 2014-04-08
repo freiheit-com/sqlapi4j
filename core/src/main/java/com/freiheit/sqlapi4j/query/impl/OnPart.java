@@ -19,6 +19,7 @@ package com.freiheit.sqlapi4j.query.impl;
 import javax.annotation.Nonnull;
 
 import com.freiheit.sqlapi4j.meta.AbstractColumnDef;
+import com.freiheit.sqlapi4j.query.BooleanExpression;
 import com.freiheit.sqlapi4j.query.FromDef;
 
 /**
@@ -34,4 +35,12 @@ public interface OnPart {
     @Nonnull
     public FromDef on(@Nonnull AbstractColumnDef<?> left,
                        @Nonnull AbstractColumnDef<?> right);
+
+    /**
+     * Adds the columns and additional expression and returns the completed FromDef.
+     */
+    @Nonnull
+    public FromDef on(@Nonnull AbstractColumnDef<?> left,
+                       @Nonnull AbstractColumnDef<?> right,
+                       @Nonnull BooleanExpression additionalExpr);
 }

@@ -16,7 +16,7 @@
  */
 package com.freiheit.sqlapi4j.query.impl;
 
-enum JoinType {
+public enum JoinType {
 	INNER_JOIN,
 	LEFT_OUTER_JOIN,
 	RIGHT_OUTER_JOIN,
