@@ -23,6 +23,7 @@ import javax.annotation.Nullable;
 
 import com.freiheit.sqlapi4j.query.BooleanExpression;
 import com.freiheit.sqlapi4j.query.FromDef;
+import com.freiheit.sqlapi4j.query.OrderItem;
 import com.freiheit.sqlapi4j.query.SelectListItem;
 import com.freiheit.sqlapi4j.query.clause.LockMode;
 import com.freiheit.sqlapi4j.query.statements.SelectStatement;
@@ -33,7 +34,7 @@ public class SqlAst implements SelectStatement {
 	private FromDef[] _fromDef;
 	private BooleanExpression _where;
 	private SelectListItem<?>[] _groupItems;
-	private SelectListItem<?>[] _orderItems;
+	private OrderItem[] _orderItems;
 	private Integer _limitNum;
 	private Integer _offsetNum;
 	private LockMode _lockMode;
@@ -94,14 +95,12 @@ public class SqlAst implements SelectStatement {
 	}
 
 	@Override
-    public SelectListItem<?>[] getOrderItems() {
+    public OrderItem[] getOrderItems() {
 		return _orderItems;
 	}
 
-	public void setOrderItems( final SelectListItem<?>... orderItems) {
-		// TODO: https://github.com/greenhornet/freiheit_sqlapi/issues/9
-	    // order direction????
-		_orderItems= orderItems;
+	public void setOrderItems( final OrderItem... orderItems) {
+		_orderItems = orderItems;
 	}
 
 	@Override

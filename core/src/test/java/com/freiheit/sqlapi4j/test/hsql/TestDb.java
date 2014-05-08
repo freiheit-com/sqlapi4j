@@ -167,6 +167,7 @@ public class TestDb {
 		insertPerson( 6, "Harry", "Potter", 170, new Date(), Gender.MALE);
 		insertPerson( 7, "Berlin", "City", 173, new Date(), Gender.MALE);
 		insertPerson( 8, "David", "david", 174, new Date(), Gender.MALE);
+        insertPerson( 9, "Hummel", null, 190, new Date(), Gender.MALE);
 	}
 
 	protected void insertPerson( final long id, final String name, final String lastName, final int height, final Date birthDate, final Gender gender) {

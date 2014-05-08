@@ -16,18 +16,52 @@
  */
 package com.freiheit.sqlapi4j.generate.impl;
 
-import com.freiheit.sqlapi4j.generate.SqlDialect;
-import com.freiheit.sqlapi4j.generate.SqlGenerator;
-import com.freiheit.sqlapi4j.meta.*;
-import com.freiheit.sqlapi4j.query.*;
-import com.freiheit.sqlapi4j.query.Sql.*;
-import com.freiheit.sqlapi4j.query.impl.*;
-import com.freiheit.sqlapi4j.query.statements.SelectStatement;
 import java.util.Iterator;
 import java.util.List;
 
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
+
+import com.freiheit.sqlapi4j.generate.SqlDialect;
+import com.freiheit.sqlapi4j.generate.SqlGenerator;
+import com.freiheit.sqlapi4j.meta.AbstractColumnDef;
+import com.freiheit.sqlapi4j.meta.ColumnConverter;
+import com.freiheit.sqlapi4j.meta.DbType;
+import com.freiheit.sqlapi4j.meta.TableAlias;
+import com.freiheit.sqlapi4j.meta.TableDef;
+import com.freiheit.sqlapi4j.query.BooleanExpression;
+import com.freiheit.sqlapi4j.query.BooleanExpressionVisitor;
+import com.freiheit.sqlapi4j.query.Column2ColumnAssignment;
+import com.freiheit.sqlapi4j.query.ColumnAssignment;
+import com.freiheit.sqlapi4j.query.ColumnValueAssignment;
+import com.freiheit.sqlapi4j.query.FromDef;
+import com.freiheit.sqlapi4j.query.FromDefVisitor;
+import com.freiheit.sqlapi4j.query.NullOrderItem;
+import com.freiheit.sqlapi4j.query.OrderItem;
+import com.freiheit.sqlapi4j.query.SelectListItem;
+import com.freiheit.sqlapi4j.query.Sql;
+import com.freiheit.sqlapi4j.query.Sql.And;
+import com.freiheit.sqlapi4j.query.Sql.BooleanCombination;
+import com.freiheit.sqlapi4j.query.Sql.ColumnComparisonOperation;
+import com.freiheit.sqlapi4j.query.Sql.ColumnEquals;
+import com.freiheit.sqlapi4j.query.Sql.ColumnEqualsIgnoreCase;
+import com.freiheit.sqlapi4j.query.Sql.ColumnGreaterThan;
+import com.freiheit.sqlapi4j.query.Sql.ColumnLessThan;
+import com.freiheit.sqlapi4j.query.Sql.InSubselectExpression;
+import com.freiheit.sqlapi4j.query.Sql.InValuesExpression;
+import com.freiheit.sqlapi4j.query.Sql.IsNotNull;
+import com.freiheit.sqlapi4j.query.Sql.IsNull;
+import com.freiheit.sqlapi4j.query.Sql.Not;
+import com.freiheit.sqlapi4j.query.Sql.Or;
+import com.freiheit.sqlapi4j.query.Sql.Ordering;
+import com.freiheit.sqlapi4j.query.Sql.PairInExpression;
+import com.freiheit.sqlapi4j.query.Sql.ParameterPair;
+import com.freiheit.sqlapi4j.query.impl.Column2ColumnComparison;
+import com.freiheit.sqlapi4j.query.impl.ColumnComparison;
+import com.freiheit.sqlapi4j.query.impl.JoinDecl;
+import com.freiheit.sqlapi4j.query.impl.ResultFlags;
+import com.freiheit.sqlapi4j.query.impl.ValueComparisonType;
+import com.freiheit.sqlapi4j.query.statements.SelectStatement;
 
 public class SqlGeneratorImpl implements SqlGenerator {
 
@@ -71,10 +105,10 @@ public class SqlGeneratorImpl implements SqlGenerator {
 			having.accept( visitor);
 		}
 
-		final SelectListItem<?>[] orderItems= syntax.getOrderItems();
+		final OrderItem[] orderItems = syntax.getOrderItems();
 		if( orderItems != null && orderItems.length > 0) {
-			dialect.addOrderBy( sb);
-			addSelectListItems( dialect, sb, orderItems);
+			dialect.addOrderBy(sb);
+			addOrderItems(dialect, sb, orderItems);
 		}
 
 		if( syntax.getLimitNum() != null || syntax.getOffsetNum() != null ) {
@@ -108,6 +142,33 @@ public class SqlGeneratorImpl implements SqlGenerator {
             }
 		}
 	}
+
+    private static void addOrderItems(final SqlDialect dialect, final StringBuilder sb, final OrderItem... orders) {
+        final OrderItem.OrderItemVisitor<Void> visitor = new OrderItem.OrderItemVisitor<Void>() {
+            @Override
+            public Void visit(@Nonnull final SelectListItem<?> item) {
+                addSelectListItems(dialect, sb, item);
+                return null;
+            }
+
+            @Override
+            public Void visit(@Nonnull final Ordering<?> ordering) {
+                addSelectListItems(dialect, sb, ordering.getItem());
+                dialect.addOrderDirection(sb, ordering.getDirection());
+                final NullOrderItem.NullOrder nullOrder = ordering.getNullOrder();
+                if (nullOrder != null) {
+                    dialect.addNullOrder(sb, nullOrder);
+                }
+                return null;
+            }
+        };
+        for( int i= 0; i < orders.length; ++i) {
+            orders[i].accept(visitor);
+            if (i < orders.length - 1) {
+                dialect.addSelectListSeparator(sb);
+            }
+        }
+    }
 
 	/**
 	 * Note: This class is not static, because it needs to recurse into the SqlGenerator when creating subqueries.

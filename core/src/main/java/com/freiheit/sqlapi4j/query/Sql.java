@@ -628,6 +628,11 @@ public class Sql {
         public DbType<Float> type() {
             return _type;
         }
+
+        @Override
+        public <I> I accept(@Nonnull final OrderItemVisitor<I> visitor) {
+            return visitor.visit(this);
+        }
     }
 
     /**
@@ -684,7 +689,13 @@ public class Sql {
 		public DbType<T> type() {
 			return _type;
 		}
-	}
+
+        @Override
+        public <I> I accept(@Nonnull final OrderItemVisitor<I> visitor) {
+            return visitor.visit(this);
+        }
+
+    }
 
     /**
      * This class is not part of the public API. Do not call it unless you know exactly what you are doing.
@@ -739,41 +750,46 @@ public class Sql {
 		return new Sum<T>( item);
 	}
 
-	private static final class Ordering<T> implements SelectListItem<T> {
+	public static class Ordering<T> implements NullOrderItem {
 
-	    // FIXME (KK, JK): https://github.com/greenhornet/freiheit_sqlapi/issues/8
-	    // Ich habe das hier reingewürgt, weil ich dringend ordering brauche - bitte saubereres Konzept ausdenken... (KK, 27.06.2011)
+        private final SelectListItem<T> _item;
+        private final Direction _direction;
+        private final NullOrder _nullOrder;
 
-	    @Nonnull private final String _name;
-		@Nonnull private final String _fqName;
-        @Nonnull private final DbType<T> _type;
+        Ordering(final SelectListItem<T> item, final Direction direction, @Nullable final NullOrder nullOrder) {
+            _item = item;
+            _direction = direction;
+            _nullOrder = nullOrder;
+        }
 
-		Ordering(final SelectListItem<T> item, final String direction) {
-			_name= item.name() + " " + direction + " ";
-			_fqName= item.fqName() + " " + direction + " ";
-			_type = item.type();
-		}
+        @Override
+        public OrderItem nullsFirst() {
+            return new Ordering<T>(_item, _direction, NullOrder.NULLS_FIRST);
+        }
 
-		@Override
-		public String fqName() {
-			return _fqName;
-		}
+        @Override
+        public OrderItem nullsLast() {
+            return new Ordering<T>(_item, _direction, NullOrder.NULLS_LAST);
+        }
 
-		@Override
-		public boolean isColumnName() {
-			return false;
-		}
+        public SelectListItem<T> getItem() {
+            return _item;
+        }
 
-		@Override
-		public String name() {
-			return _name;
-		}
+        public Direction getDirection() {
+            return _direction;
+        }
 
-		@Override
-		public DbType<T> type() {
-			return _type;
-		}
-	}
+        @CheckForNull
+        public NullOrder getNullOrder() {
+            return _nullOrder;
+        }
+
+        @Override
+        public <I> I accept(@Nonnull final OrderItemVisitor<I> visitor) {
+            return visitor.visit(this);
+        }
+    }
 
 	public static SelectListItem<Float> random() {
 	    return new Random();
@@ -783,16 +799,16 @@ public class Sql {
 	 * This method decorates its parameter expression for ascending ordering, suitable for use in an ORDER BY clauses.
 	 */
 	@Nonnull
-	public static <T> SelectListItem<T> asc(final SelectListItem<T> item) {
-		return new Ordering<T>( item, "asc");
+	public static <T> NullOrderItem asc(final SelectListItem<T> item) {
+		return new Ordering<T>( item, OrderItem.Direction.ASC, null );
 	}
 
 	/**
 	 * This method decorates its parameter expression for descending ordering, suitable for use in an ORDER BY clauses.
 	 */
 	@Nonnull
-	public static <T> SelectListItem<T> desc(final SelectListItem<T> item) {
-		return new Ordering<T>( item, "desc");
+	public static <T> NullOrderItem desc(final SelectListItem<T> item) {
+		return new Ordering<T>( item, OrderItem.Direction.DESC, null );
 	}
 
     public static final class ParameterPair<T1,T2> {

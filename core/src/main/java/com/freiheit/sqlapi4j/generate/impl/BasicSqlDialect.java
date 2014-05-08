@@ -18,14 +18,16 @@ package com.freiheit.sqlapi4j.generate.impl;
 
 import java.sql.Types;
 
+import javax.annotation.Nonnull;
+
 import com.freiheit.sqlapi4j.generate.SqlDialect;
 import com.freiheit.sqlapi4j.generate.SqlStdConverter;
 import com.freiheit.sqlapi4j.meta.ColumnConverter;
 import com.freiheit.sqlapi4j.meta.DbType;
+import com.freiheit.sqlapi4j.query.NullOrderItem;
+import com.freiheit.sqlapi4j.query.OrderItem;
 import com.freiheit.sqlapi4j.query.clause.LockMode;
 import com.freiheit.sqlapi4j.query.impl.ValueComparisonType;
-
-import javax.annotation.Nonnull;
 
 public abstract class BasicSqlDialect implements SqlDialect {
 
@@ -281,5 +283,24 @@ public abstract class BasicSqlDialect implements SqlDialect {
 
     public void addInnerJoin(@Nonnull final StringBuilder sb) {
         sb.append(" INNER JOIN ");
+    }
+
+    @Override
+    public void addOrderDirection(@Nonnull final StringBuilder sb, @Nonnull final OrderItem.Direction direction) {
+        sb.append(" ").append(direction.name()).append(" ");
+    }
+
+    @Override
+    public void addNullOrder(@Nonnull final StringBuilder sb, @Nonnull final NullOrderItem.NullOrder nullOrder) {
+        switch (nullOrder) {
+            case NULLS_FIRST:
+                sb.append(" nulls first ");
+                break;
+            case NULLS_LAST:
+                sb.append(" nulls last ");
+                break;
+            default:
+                throw new IllegalStateException("illegal enum constant");
+        }
     }
 }

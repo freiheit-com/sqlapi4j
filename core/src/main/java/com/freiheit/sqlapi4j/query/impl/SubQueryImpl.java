@@ -20,6 +20,7 @@ import javax.annotation.ParametersAreNonnullByDefault;
 
 import com.freiheit.sqlapi4j.query.BooleanExpression;
 import com.freiheit.sqlapi4j.query.FromDef;
+import com.freiheit.sqlapi4j.query.OrderItem;
 import com.freiheit.sqlapi4j.query.SelectListItem;
 import com.freiheit.sqlapi4j.query.SubQuery;
 import com.freiheit.sqlapi4j.query.clause.SubFromClause;
@@ -64,7 +65,7 @@ public class SubQueryImpl<T> extends AbstractQuery implements SubFromClause<T>, 
 	}
 
 	@Override
-    public SubLimitClause<T> orderBy(final SelectListItem<T> item) {
+    public SubLimitClause<T> orderBy(final OrderItem... item) {
 	    applyOrderBy(item);
 	    return this;
 	}
