@@ -21,6 +21,7 @@ import javax.annotation.CheckForNull;
 
 import com.freiheit.sqlapi4j.query.BooleanExpression;
 import com.freiheit.sqlapi4j.query.FromDef;
+import com.freiheit.sqlapi4j.query.OrderItem;
 import com.freiheit.sqlapi4j.query.SelectListItem;
 import com.freiheit.sqlapi4j.query.clause.LockMode;
 
@@ -42,7 +43,7 @@ public interface SelectStatement {
 	BooleanExpression getWhere();
 
     @CheckForNull
-	SelectListItem<?>[] getOrderItems();
+	OrderItem[] getOrderItems();
 
     @CheckForNull
 	SelectListItem<?>[] getGroupItems();

@@ -1,5 +1,5 @@
 /**
- * Copyright 2013 freiheit.com technologies gmbh
+ * Copyright 2014 freiheit.com technologies gmbh
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,22 +14,34 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.freiheit.sqlapi4j.query.clause;
+package com.freiheit.sqlapi4j.query;
+
+import static com.freiheit.sqlapi4j.query.Sql.Ordering;
 
 import javax.annotation.Nonnull;
 import javax.annotation.ParametersAreNonnullByDefault;
 
-import com.freiheit.sqlapi4j.query.OrderItem;
-import com.freiheit.sqlapi4j.query.SqlCommand;
+/**
+ * Representing a single expression for the ORDER BY clause
+ *
+ * @author Ulrich Geilmann (ulrich.geilmann@freiheit.com)
+ */
+public interface OrderItem {
 
+    public static enum Direction {
+        ASC,
+        DESC
+    }
 
-@ParametersAreNonnullByDefault
-public interface IOrderByClause<R, T extends SqlCommand<R>, C extends ILimitClause<R, T, ? extends IOffsetClause<R, T>>> {
+    public <T> T accept(@Nonnull OrderItemVisitor<T> visitor);
 
-    /**
-     * Specify the result ordering for the ORDER BY clause.
-     */
-    @Nonnull
-    C orderBy(OrderItem... items);
+    @ParametersAreNonnullByDefault
+    public interface OrderItemVisitor<T> {
+
+        T visit(SelectListItem<?> item);
+
+        T visit(Ordering<?> ordering);
+
+    }
 
 }

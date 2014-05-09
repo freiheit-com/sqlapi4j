@@ -16,13 +16,13 @@
  */
 package com.freiheit.sqlapi4j.test.hsql;
 
-import com.freiheit.sqlapi4j.meta.TableAlias;
 import java.sql.Connection;
 import java.sql.SQLException;
 
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import com.freiheit.sqlapi4j.meta.TableAlias;
 import com.freiheit.sqlapi4j.query.SelectResult;
 import com.freiheit.sqlapi4j.query.SelectSequenceCommand;
 import com.freiheit.sqlapi4j.query.Sql;
@@ -37,8 +37,8 @@ public class SelectTest extends TestBase {
 
 	private static Object[][] RESULT_SINGLE= new Object[][] { { "Ford" } };
 	private static Object[][] RESULT_JOIN= new Object[][] { { "Berlin" } };
-	private static Object[][] RESULT_LEFT_OUTER_JOIN= new Object[][] { { "Berlin", "Berlin" }, { "David", null }, { "Ford", null }, { "Hans", null }, { "Harry", null }, { "Mary", null }, { "Paul", null }, { "Peter", null } };
-	private static Object[][] RESULT_LEFT_OUTER_JOIN_WITH_ADDITIONAL_EXPR = new Object[][] { { "Berlin", null }, { "David", null }, { "Ford", null }, { "Hans", null }, { "Harry", null }, { "Mary", null }, { "Paul", null }, { "Peter", null } };
+	private static Object[][] RESULT_LEFT_OUTER_JOIN= new Object[][] { { "Berlin", "Berlin" }, { "David", null }, { "Ford", null }, { "Hans", null }, { "Harry", null }, {"Hummel", null }, { "Mary", null }, { "Paul", null }, { "Peter", null } };
+	private static Object[][] RESULT_LEFT_OUTER_JOIN_WITH_ADDITIONAL_EXPR = new Object[][] { { "Berlin", null }, { "David", null }, { "Ford", null }, { "Hans", null }, { "Harry", null }, {"Hummel", null }, { "Mary", null }, { "Paul", null }, { "Peter", null } };
 	private static Object[][] RESULT_NOT_SINGLE= new Object[][] { { "Peter" }, { "Paul" }, { "Mary" }, { "Hans" }, { "Harry" }, { "Berlin" }, {"David"}};
 	//{ "Ford" },
 
@@ -54,9 +54,13 @@ public class SelectTest extends TestBase {
 	private static Object[][] RESULT_MULTIPLE= new Object[][] { new Object[] { "Mary", 158 }, new Object[] { "Ford", 158 } };
 	private static Object[][] RESULT_WHERE_IN= new Object[][] { new Object[] { "Mary", 158, Gender.FEMALE }, new Object[] { "Ford", 158, Gender.MALE } };
 	private static Object[][] RESULT_ALIAS= new Object[][] { new Object[] { "Ford", 4L, 1L } };
-	private static Object[][] RESULT_GROUP= new Object[][] { new Object[] { 158, 2l }, new Object[] { 170, 3l }, new Object[] { 173, 1l }, new Object[] {174, 1l}, new Object[] { 178, 1l } };
-	private static Object[][] RESULT_SUM= new Object[][] { new Object[] { 158, 7l }, new Object[] { 170, 13l }, new Object[] { 173, 7l }, new Object[] {174, 8l}, new Object[] { 178, 1l } };
+	private static Object[][] RESULT_GROUP= new Object[][] { new Object[] { 158, 2l }, new Object[] { 170, 3l }, new Object[] { 173, 1l }, new Object[] {174, 1l}, new Object[] { 178, 1l }, new Object[] { 190, 1l } };
+	private static Object[][] RESULT_SUM= new Object[][] { new Object[] { 158, 7l }, new Object[] { 170, 13l }, new Object[] { 173, 7l }, new Object[] {174, 8l}, new Object[] { 178, 1l }, new Object[] { 190, 9l } };
 	private static Object[][] RESULT_SUBSELECT= new Object[][] { new Object[] { "Paul", 170 }, new Object[] { "Hans", 170 }, new Object[] { "Harry", 170 } };
+    private static Object[][] RESULT_NULLS_FIRST = new Object[][] { { null }, { "City" }, { "Pan" }, { "Panzer" }, { "Poppins" }, { "Potter" }, { "Prefect" }, { "Wurst" }, { "david" } };
+    private static Object[][] RESULT_NULLS_LAST = new Object[][] { { "City" }, { "Pan" }, { "Panzer" }, { "Poppins" }, { "Potter" }, { "Prefect" }, { "Wurst" }, { "david" }, { null } };
+    private static Object[][] RESULT_AGGREGATE_ORDER = new Object[][] { { Gender.MALE, 190 }, { Gender.FEMALE, 158 } };
+    private static Object[][] RESULT_ORDER_MULTIPLE = new Object[][] { { "Mary", 158 }, { "Ford", 158 }, { "Paul", 170 }, { "Harry", 170 }, { "Hans", 170 }, { "Berlin", 173 }, { "David", 174 }, { "Peter", 178 }, { "Hummel", 190 } };
 
 	@Test
 	public void testSelectWhereIn() {
@@ -413,5 +417,61 @@ public class SelectTest extends TestBase {
 			}
 		});
 	}
+
+    @Test
+    public void testOrderNullsFirst() {
+        final SqlCommand<SelectStatement> query = SQL.select(Person.LASTNAME).from(Person.TABLE).orderBy(Sql.asc(Person.LASTNAME).nullsFirst());
+        TestDb.INSTANCE.executeSingle( new DbOperation<Void>() {
+            @Override
+            public Void execute( final Connection c) throws SQLException {
+                final SelectResult res = executeQuery(c, query);
+                assertResultSet(res, RESULT_NULLS_FIRST, "test-order-nulls-first");
+                return null;
+            }
+        });
+    }
+
+    @Test
+    public void testOrderNullsLast() {
+        final SqlCommand<SelectStatement> query = SQL.select(Person.LASTNAME).from(Person.TABLE).orderBy(Sql.asc(Person.LASTNAME).nullsLast());
+        TestDb.INSTANCE.executeSingle( new DbOperation<Void>() {
+            @Override
+            public Void execute( final Connection c) throws SQLException {
+                final SelectResult res = executeQuery(c, query);
+                assertResultSet(res, RESULT_NULLS_LAST, "test-order-nulls-last");
+                return null;
+            }
+        });
+    }
+
+    @Test
+    public void testOrderAggregate() {
+        final SqlCommand<SelectStatement> query = SQL.select(Person.GENDER, Sql.max(Person.HEIGTH))
+                .from(Person.TABLE)
+                .groupBy(Person.GENDER)
+                .orderBy(Sql.desc(Sql.max(Person.HEIGTH)));
+        TestDb.INSTANCE.executeSingle( new DbOperation<Void>() {
+            @Override
+            public Void execute( final Connection c) throws SQLException {
+                final SelectResult res = executeQuery(c, query);
+                assertResultSet(res, RESULT_AGGREGATE_ORDER, "test-order-aggregate");
+                return null;
+            }
+        });
+    }
+
+    @Test
+    public void testOrderMultiple() {
+        final SqlCommand<SelectStatement> query = SQL.select(Person.NAME, Person.HEIGTH)
+                .from(Person.TABLE).orderBy(Person.HEIGTH, Sql.desc(Person.NAME));
+        TestDb.INSTANCE.executeSingle( new DbOperation<Void>() {
+            @Override
+            public Void execute( final Connection c) throws SQLException {
+                final SelectResult res = executeQuery(c, query);
+                assertResultSet(res, RESULT_ORDER_MULTIPLE, "test-order-multiple");
+                return null;
+            }
+        });
+    }
 
 }

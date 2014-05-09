@@ -61,8 +61,8 @@ public class AbstractDaoTest extends DaoTestBase {
     private static List<List<Object>> RESULT_LIKE = toNestedList(new Object[][] { { "Peter", 178 }, { "Paul", 170 } });
     private static List<List<Object>> RESULT_MULTIPLE = toNestedList(new Object[][] { { "Mary", 158 }, { "Ford", 158 } });
     private static List<List<Object>> RESULT_WHERE_IN = toNestedList(new Object[][] { { "Mary", 158, Gender.FEMALE }, { "Ford", 158, Gender.MALE } });
-    private static List<List<Object>> RESULT_GROUP = toNestedList(new Object[][] { { 158, 2l }, { 170, 3l }, { 173, 1l }, { 174, 1l}, { 178, 1l } });
-    private static List<List<Object>> RESULT_SUM = toNestedList(new Object[][] { { 158, 7l }, { 170, 13l }, { 173, 7l }, { 174, 8l},{ 178, 1l } });
+    private static List<List<Object>> RESULT_GROUP = toNestedList(new Object[][] { { 158, 2l }, { 170, 3l }, { 173, 1l }, { 174, 1l}, { 178, 1l }, { 190, 1l } });
+    private static List<List<Object>> RESULT_SUM = toNestedList(new Object[][] { { 158, 7l }, { 170, 13l }, { 173, 7l }, { 174, 8l},{ 178, 1l }, { 190, 9l } });
     private static List<List<Object>> RESULT_SUBSELECT = toNestedList(new Object[][] { { "Paul", 170 }, { "Hans", 170 }, { "Harry", 170 } });
 
     private final AbstractDao _dao = new AbstractDao(new TestTransactionTemplate(), EXEC, SQL) {};

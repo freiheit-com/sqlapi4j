@@ -19,7 +19,7 @@ package com.freiheit.sqlapi4j.query.clause;
 import javax.annotation.Nonnull;
 import javax.annotation.ParametersAreNonnullByDefault;
 
-import com.freiheit.sqlapi4j.query.SelectListItem;
+import com.freiheit.sqlapi4j.query.OrderItem;
 
 
 /**
@@ -34,6 +34,6 @@ public interface SubOrderByClause<T> extends SubLimitClause<T> {
      * Specify the result ordering for the ORDER BY clause.
      */
     @Nonnull
-    SubLimitClause<T> orderBy(SelectListItem<T> item);
+    SubLimitClause<T> orderBy(OrderItem... item);
 
 }

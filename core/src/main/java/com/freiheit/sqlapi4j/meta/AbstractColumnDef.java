@@ -306,6 +306,11 @@ public abstract class AbstractColumnDef<T> implements SelectListItem<T> {
 		return Sql.ilike( this, value);
 	}
 
+    @Override
+    public <I> I accept(@Nonnull final OrderItemVisitor<I> visitor) {
+        return visitor.visit(this);
+    }
+
 	@Override
 	public int hashCode() {
 		return _dbColname.hashCode();

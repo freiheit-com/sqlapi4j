@@ -24,6 +24,8 @@ import javax.annotation.ParametersAreNonnullByDefault;
 import com.freiheit.sqlapi4j.meta.ColumnConverter;
 import com.freiheit.sqlapi4j.meta.DbType;
 import com.freiheit.sqlapi4j.query.FromDef;
+import com.freiheit.sqlapi4j.query.NullOrderItem;
+import com.freiheit.sqlapi4j.query.OrderItem;
 import com.freiheit.sqlapi4j.query.clause.LockMode;
 import com.freiheit.sqlapi4j.query.impl.ValueComparisonType;
 
@@ -112,4 +114,8 @@ public interface SqlDialect {
     void addFullOuterJoin(@Nonnull StringBuilder sb);
 
     void addInnerJoin(@Nonnull StringBuilder sb);
+
+    void addOrderDirection(@Nonnull StringBuilder sb, @Nonnull OrderItem.Direction direction);
+
+    void addNullOrder(@Nonnull StringBuilder sb, @Nonnull NullOrderItem.NullOrder nullOrder);
 }

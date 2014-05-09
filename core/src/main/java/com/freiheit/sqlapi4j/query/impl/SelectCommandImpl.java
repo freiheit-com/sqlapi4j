@@ -21,6 +21,7 @@ import javax.annotation.ParametersAreNonnullByDefault;
 
 import com.freiheit.sqlapi4j.query.BooleanExpression;
 import com.freiheit.sqlapi4j.query.FromDef;
+import com.freiheit.sqlapi4j.query.OrderItem;
 import com.freiheit.sqlapi4j.query.SelectCommand;
 import com.freiheit.sqlapi4j.query.SelectListItem;
 import com.freiheit.sqlapi4j.query.clause.FromClause;
@@ -70,7 +71,7 @@ public class SelectCommandImpl extends AbstractQuery implements FromClause, Wher
     }
 
     @Override
-    public LimitClause orderBy(final SelectListItem<?>... items) {
+    public LimitClause orderBy(final OrderItem... items) {
         applyOrderBy(items);
         return this;
     }

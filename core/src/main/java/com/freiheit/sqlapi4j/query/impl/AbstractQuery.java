@@ -22,9 +22,10 @@ import javax.annotation.ParametersAreNonnullByDefault;
 
 import com.freiheit.sqlapi4j.query.BooleanExpression;
 import com.freiheit.sqlapi4j.query.FromDef;
+import com.freiheit.sqlapi4j.query.OrderItem;
 import com.freiheit.sqlapi4j.query.SelectListItem;
-import com.freiheit.sqlapi4j.query.SqlCommand;
 import com.freiheit.sqlapi4j.query.Sql.And;
+import com.freiheit.sqlapi4j.query.SqlCommand;
 import com.freiheit.sqlapi4j.query.statements.SelectStatement;
 
 @ParametersAreNonnullByDefault
@@ -71,8 +72,8 @@ abstract class AbstractQuery implements SqlCommand<SelectStatement> {
         getSyntax().setHaving(conditions.length == 0 ? null : new And(conditions));
     }
 
-    protected void applyOrderBy(final SelectListItem<?>... items) {
-        getSyntax().setOrderItems(items);
+    protected void applyOrderBy(final OrderItem... orders) {
+        getSyntax().setOrderItems(orders);
     }
 
     protected void applyLimit(@Nonnegative final int limit) {

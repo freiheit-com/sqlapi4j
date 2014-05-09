@@ -31,6 +31,7 @@ import com.freiheit.sqlapi4j.query.ColumnValueAssignment;
 import com.freiheit.sqlapi4j.query.FromDef;
 import com.freiheit.sqlapi4j.query.InsertCommand;
 import com.freiheit.sqlapi4j.query.InsertSelectQuery;
+import com.freiheit.sqlapi4j.query.OrderItem;
 import com.freiheit.sqlapi4j.query.SelectListItem;
 import com.freiheit.sqlapi4j.query.Sql.And;
 import com.freiheit.sqlapi4j.query.clause.InsertFromClause;
@@ -93,7 +94,7 @@ public class InsertCommandImpl extends AbstractInsertOrUpdateCommand<InsertState
 	}
 
 	@Override
-    public InsertLimitClause orderBy(final SelectListItem<?>... items) {
+    public InsertLimitClause orderBy(final OrderItem... items) {
 	    throw new UnsupportedOperationException();
 	}
 

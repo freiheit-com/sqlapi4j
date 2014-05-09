@@ -74,6 +74,11 @@ public class SelectSequenceStatementExecutor {
 	    public DbType<Long> type() {
 	        return DB_LONG;
 	    }
+
+        @Override
+        public <I> I accept(@Nonnull final OrderItemVisitor<I> visitor) {
+            return visitor.visit(this);
+        }
 	}
 
 	public SelectSequenceStatementExecutor(final SqlDialect dialect, final SqlGenerator sqlGenerator) {

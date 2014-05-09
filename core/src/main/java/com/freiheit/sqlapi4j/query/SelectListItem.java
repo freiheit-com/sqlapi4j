@@ -23,7 +23,7 @@ import com.freiheit.sqlapi4j.meta.DbType;
 // TODO: https://github.com/greenhornet/freiheit_sqlapi/issues/17
 // spezielle SelectListItem-Wrapper, denen man einen Property-Accessor
 // geben kann, über den die Zuweisung der Spalte aus dem Resultset stattfindet
-public interface SelectListItem<T> {
+public interface SelectListItem<T> extends OrderItem {
 	//	@SuppressWarnings( "unchecked")
 	//	static final SelectListItem<?> ALL= new SelectListItem() {
 	//		@Override
