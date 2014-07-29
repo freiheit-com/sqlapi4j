@@ -18,10 +18,21 @@ package com.freiheit.sqlapi4j.test.hsql;
 
 import com.freiheit.sqlapi4j.generate.impl.ConverterRegistry;
 import com.freiheit.sqlapi4j.generate.impl.H2DbDialect;
-import com.freiheit.sqlapi4j.query.*;
+import com.freiheit.sqlapi4j.meta.ColumnDef;
+import com.freiheit.sqlapi4j.query.BooleanExpression;
+import com.freiheit.sqlapi4j.query.SelectResult;
+import com.freiheit.sqlapi4j.query.Sql;
+import com.freiheit.sqlapi4j.query.SqlBuilder;
+import com.freiheit.sqlapi4j.query.SqlCommand;
+import com.freiheit.sqlapi4j.query.SqlExecutor;
+import com.freiheit.sqlapi4j.query.SqlResultRow;
 import com.freiheit.sqlapi4j.query.impl.SqlBuilderImpl;
 import com.freiheit.sqlapi4j.query.impl.SqlExecutorImpl;
-import com.freiheit.sqlapi4j.query.statements.*;
+import com.freiheit.sqlapi4j.query.statements.CreateTableStatement;
+import com.freiheit.sqlapi4j.query.statements.InsertStatement;
+import com.freiheit.sqlapi4j.query.statements.SelectSequenceStatement;
+import com.freiheit.sqlapi4j.query.statements.SelectStatement;
+import com.freiheit.sqlapi4j.query.statements.UpdateStatement;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Arrays;
@@ -40,7 +51,11 @@ public class TestBase {
     }
 
 	protected static Integer executeInsert(final Connection conn, final SqlCommand<InsertStatement> query) throws SQLException {
-	    return EXEC.execute(conn, query.stmt());
+	    return EXEC.execute(conn, query.stmt(), null).getNofRowsInserted();
+	}
+
+	protected static <I> InsertStatement.Result<I> executeInsert(final Connection conn, final SqlCommand<InsertStatement> query, final ColumnDef<I> idCol) throws SQLException {
+	    return EXEC.execute(conn, query.stmt(), idCol);
 	}
 
 	protected static Integer executeUpdate(final Connection conn, final SqlCommand<UpdateStatement> query) throws SQLException {

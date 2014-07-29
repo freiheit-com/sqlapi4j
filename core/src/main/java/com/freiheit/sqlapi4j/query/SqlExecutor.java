@@ -16,10 +16,12 @@
  */
 package com.freiheit.sqlapi4j.query;
 
+import com.freiheit.sqlapi4j.meta.ColumnDef;
 import java.sql.Connection;
 import java.sql.SQLException;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 import com.freiheit.sqlapi4j.query.statements.CreateTableStatement;
 import com.freiheit.sqlapi4j.query.statements.DeleteStatement;
@@ -40,6 +42,7 @@ public interface SqlExecutor {
     int execute(@Nonnull Connection connection, @Nonnull DeleteStatement statement) throws SQLException;
     String render(@Nonnull DeleteStatement statement);
     int execute(@Nonnull Connection connection, @Nonnull InsertStatement statement) throws SQLException;
+    <I> InsertStatement.Result<I> execute(@Nonnull Connection connection, @Nonnull InsertStatement statement, @Nullable ColumnDef<I> idCol) throws SQLException;
     String render(@Nonnull InsertStatement statement) throws SQLException;
     int execute(@Nonnull Connection connection, @Nonnull UpdateStatement statement) throws SQLException;
     String render(@Nonnull UpdateStatement statement);

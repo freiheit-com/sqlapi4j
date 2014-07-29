@@ -57,6 +57,9 @@ public class TestDb {
 	private static final String PERSON_DROP_SEQUENCE_STR= "drop sequence person_seq";
 	protected static final String PERSON_INSERT_STR= "insert into person ( id, name, lastname, height, birth_date, gender) values (?,?,?,?,?,?);";
 
+	private static final String CAT_DDL_STR= "create table cat ( id integer not null auto_increment primary key, name varchar);";
+	private static final String CAT_DROP_STR= "drop table cat";
+
 	public static enum Gender {
 		MALE,
 		FEMALE,
@@ -99,6 +102,14 @@ public class TestDb {
 		public static final TableDef TABLE= new TableDef( "person", ID, NAME, LASTNAME, HEIGTH, BIRTH_DATE, GENDER);
 	}
 
+    public static class Cat {
+
+        public static final ColumnDef<Long>           ID   = ColumnDefs.longT("id");
+        public static final ColumnDefNullable<String> NAME = ColumnDefs.varcharNullable( "name");
+
+        public static final TableDef TABLE = new TableDef( "cat", ID, NAME);
+    }
+
     public TestDb() {
         super();
     }
@@ -111,6 +122,8 @@ public class TestDb {
 				pstmt.execute( PERSON_DDL_STR);
 				final Statement astmt= c.createStatement();
 				astmt.execute( ADDRESS_DDL_STR);
+				final Statement cstmt= c.createStatement();
+				cstmt.execute( CAT_DDL_STR);
 				final Statement asstmt= c.createStatement();
 				asstmt.execute( ADDRESS_CREATE_SEQUENCE_STR);
 				final Statement psstmt= c.createStatement();
@@ -128,6 +141,8 @@ public class TestDb {
 	            pstmt.execute( PERSON_DROP_STR);
 	            final Statement astmt= c.createStatement();
 	            astmt.execute( ADDRESS_DROP_STR);
+	            final Statement cstmt= c.createStatement();
+	            cstmt.execute( CAT_DROP_STR);
 	            final Statement psstmt= c.createStatement();
 	            psstmt.execute( PERSON_DROP_SEQUENCE_STR);
 	            final Statement asstmt= c.createStatement();
