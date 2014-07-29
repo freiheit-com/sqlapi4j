@@ -130,6 +130,18 @@ public abstract class SingleTableDao<I, T> extends AbstractDao {
     }
 
     /**
+     * Insert an entity, setting the given column values.
+     *
+     * Only use this method, if the pkColumn is an auto-increment-column.
+     *
+     * @return the id of the inserted entity.
+     */
+    @Nonnull
+    protected I insert(final ColumnValueAssignment<?>... cols) {
+        return insertGenerateId(pkColumn(), sql().insert(table()).values(cols));
+    }
+
+    /**
      * Insert multiple entities, setting the given column values.
      *
      * Example Usage:

@@ -16,10 +16,12 @@
  */
 package com.freiheit.sqlapi4j.query.impl;
 
+import com.freiheit.sqlapi4j.meta.ColumnDef;
 import java.sql.Connection;
 import java.sql.SQLException;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 import com.freiheit.sqlapi4j.generate.SqlDialect;
 import com.freiheit.sqlapi4j.generate.SqlGenerator;
@@ -44,57 +46,62 @@ public class SqlExecutorImpl implements SqlExecutor {
     private final SelectSequenceStatementExecutor _selectSequenceExecutor;
     private final CreateTableStatementExecutor _createTableExecutor;
 
-	/**
-	 * Standard constructor to create a QueryBuilder.
-	 */
-	public SqlExecutorImpl( final SqlDialect dialect) {
-		this( dialect, new SqlGeneratorImpl(), SqlQueryType.PREPARED);
-	}
+    /**
+     * Standard constructor to create a QueryBuilder.
+     */
+    public SqlExecutorImpl( final SqlDialect dialect) {
+        this( dialect, new SqlGeneratorImpl(), SqlQueryType.PREPARED);
+    }
 
-	private SqlExecutorImpl( final SqlDialect dialect, final SqlGenerator generator, final SqlQueryType queryType) {
-		_insertStatementExecutor = new InsertStatementExecutor(queryType, dialect, generator);
-		_updateStatementExecutor = new UpdateStatementExecutor(queryType, dialect, generator);
-		_deleteStatementExecutor = new DeleteStatementExecutor(queryType, dialect, generator);
-		_selectStatementExecutor = new SelectStatementExecutor(queryType, dialect, generator);
-		_selectSequenceExecutor = new SelectSequenceStatementExecutor(dialect, generator);
-		_createTableExecutor = new CreateTableStatementExecutor(dialect, generator);
-	}
+    private SqlExecutorImpl( final SqlDialect dialect, final SqlGenerator generator, final SqlQueryType queryType) {
+        _insertStatementExecutor = new InsertStatementExecutor(queryType, dialect, generator);
+        _updateStatementExecutor = new UpdateStatementExecutor(queryType, dialect, generator);
+        _deleteStatementExecutor = new DeleteStatementExecutor(queryType, dialect, generator);
+        _selectStatementExecutor = new SelectStatementExecutor(queryType, dialect, generator);
+        _selectSequenceExecutor = new SelectSequenceStatementExecutor(dialect, generator);
+        _createTableExecutor = new CreateTableStatementExecutor(dialect, generator);
+    }
 
-	@Override
-	public int execute(@Nonnull final Connection connection, @Nonnull final DeleteStatement query) throws SQLException {
-	    return _deleteStatementExecutor.execute(connection, query);
-	}
+    @Override
+    public int execute(@Nonnull final Connection connection, @Nonnull final DeleteStatement query) throws SQLException {
+        return _deleteStatementExecutor.execute(connection, query);
+    }
 
-	@Override
-	public int execute(@Nonnull final Connection connection, @Nonnull final InsertStatement statement) throws SQLException {
-	    return _insertStatementExecutor.execute(connection, statement);
-	}
+    @Override
+    public int execute(@Nonnull final Connection connection, @Nonnull final InsertStatement statement) throws SQLException {
+        return execute(connection, statement, null).getNofRowsInserted();
+    }
 
-	@Override
-	public int execute(@Nonnull final Connection connection, @Nonnull final UpdateStatement statement) throws SQLException {
-	    return _updateStatementExecutor.execute(connection, statement);
-	}
+    @Override
+    public <I> InsertStatement.Result execute(@Nonnull final Connection connection, @Nonnull final InsertStatement statement, @Nullable ColumnDef<I> idCol) throws SQLException {
+        return _insertStatementExecutor.execute(connection, statement, idCol);
+    }
 
-	@Override
-	public SelectResult execute(@Nonnull final Connection connection, @Nonnull final SelectStatement statement) throws SQLException {
-	    return _selectStatementExecutor.execute(connection, statement);
-	}
+    @Override
+    public int execute(@Nonnull final Connection connection, @Nonnull final UpdateStatement statement) throws SQLException {
+        return _updateStatementExecutor.execute(connection, statement);
+    }
 
-	@Override
-	public long execute(@Nonnull final Connection connection, @Nonnull final SelectSequenceStatement statement) throws SQLException {
-	    return _selectSequenceExecutor.execute(connection, statement);
-	}
+    @Override
+    public SelectResult execute(@Nonnull final Connection connection, @Nonnull final SelectStatement statement) throws SQLException {
+        return _selectStatementExecutor.execute(connection, statement);
+    }
 
-	@Override
-	public <T> T execute(@Nonnull final Connection connection, @Nonnull final SelectSequenceStatement statement, final SelectListItem<T> targetColumn)
-	        throws SQLException {
-	    return _selectSequenceExecutor.execute(connection, statement, targetColumn);
-	}
+    @Override
+    public long execute(@Nonnull final Connection connection, @Nonnull final SelectSequenceStatement statement) throws SQLException {
+        return _selectSequenceExecutor.execute(connection, statement);
+    }
 
-	@Override
-	public void execute(@Nonnull final Connection connection, @Nonnull final CreateTableStatement statement) throws SQLException {
-	    _createTableExecutor.execute(connection, statement);
-	}
+    @Override
+    public <T> T execute(@Nonnull final Connection connection, @Nonnull final SelectSequenceStatement statement, final SelectListItem<T> targetColumn)
+            throws SQLException {
+        return _selectSequenceExecutor.execute(connection, statement, targetColumn);
+    }
+
+    @Override
+    public void execute(@Nonnull final Connection connection, @Nonnull final CreateTableStatement statement) throws SQLException {
+        _createTableExecutor.execute(connection, statement);
+    }
 
     @Override
     public String render(@Nonnull final CreateTableStatement statement) throws SQLException {

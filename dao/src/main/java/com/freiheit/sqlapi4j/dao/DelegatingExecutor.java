@@ -16,10 +16,12 @@
  */
 package com.freiheit.sqlapi4j.dao;
 
+import com.freiheit.sqlapi4j.meta.ColumnDef;
 import java.sql.Connection;
 import java.sql.SQLException;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 
 import com.freiheit.sqlapi4j.query.SelectListItem;
@@ -55,6 +57,11 @@ public class DelegatingExecutor implements SqlExecutor {
     @Override
     public int execute(@Nonnull final Connection connection, @Nonnull final InsertStatement statement) throws SQLException {
         return _executor.execute(connection, statement);
+    }
+
+    @Override
+    public <I> InsertStatement.Result<I> execute(@Nonnull final Connection connection, @Nonnull final InsertStatement statement, @Nullable final ColumnDef<I> idCol) throws SQLException {
+        return _executor.execute(connection, statement, idCol);
     }
 
     @Override

@@ -125,7 +125,26 @@ public class InsertUpdateTest extends TestBase {
 		});
 	}
 
-	private static InsertCommand insertAddress( final long id, final String city, final String street, final int num, final String zip, final Country country) {
+    @Test
+    public void testInsertWithAutoIncrementCol() throws SQLException {
+        final SqlCommand<InsertStatement> insert= SQL.insert(TestDb.Cat.TABLE).values(TestDb.Cat.ID.set(1l), TestDb.Cat.NAME.set("Garfield"));
+
+        System.out.println( EXEC.render(insert.stmt()));
+
+        TestDb.INSTANCE.executeSingle( new DbOperation<Void>() {
+            @Override
+            public Void execute( final Connection c) throws SQLException {
+                final InsertStatement.Result<Long> insertResult = executeInsert(c, insert, TestDb.Cat.ID);
+                Assert.assertEquals( insertResult.getNofRowsInserted(), 1);
+                Assert.assertNotNull( insertResult.getInsertedIds());
+                Assert.assertEquals( insertResult.getInsertedIds().size(), 1);
+                Assert.assertNotNull( insertResult.getInsertedIds().get(0));
+                return null;
+            }
+        });
+    }
+
+    private static InsertCommand insertAddress( final long id, final String city, final String street, final int num, final String zip, final Country country) {
 		return SQL.insert( Address.TABLE).values( Address.ID.set( id), Address.CITY.set( city), Address.STREET.set( street), Address.NUMBER.set( num), Address.ZIP.set( zip), Address.COUNTRY.set( country));
 	}
 
