@@ -405,6 +405,20 @@ public class SelectTest extends TestBase {
 	}
 
 	@Test
+	public void testAggregateWithoutResult() {
+		final SqlCommand<SelectStatement> query= SQL.select( Sql.max( Person.NAME)).from( Person.TABLE).where( Person.NAME.eq("nonexistent"));
+
+		TestDb.INSTANCE.executeSingle( new DbOperation<Void>() {
+			@Override
+			public Void execute( final Connection c) throws SQLException {
+				final SelectResult res= executeQuery(c, query);
+				assertResultSet( res, new Object[][] { new Object[] { null }}, "test-aggregate-without-result");
+                return null;
+			}
+		});
+	}
+
+	@Test
 	public void testAggregateEnum() {
 		final SqlCommand<SelectStatement> query= SQL.select( Sql.max( Person.GENDER)).from( Person.TABLE).where( Person.ID.gt( 0l));
 
