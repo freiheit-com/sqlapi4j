@@ -275,6 +275,22 @@ public abstract class SingleTableDao<I, T> extends AbstractDao {
     }
 
     /**
+     * Get the maximum value of the given column for the given expression.
+     */
+    @CheckForNull
+    protected <T> T max(@Nonnull final SelectListItem<T> col, final BooleanExpression... expr) {
+        return max(col, table(), expr);
+    }
+
+    /**
+     * Get the minimum value of the given column for the given expression.
+     */
+    @CheckForNull
+    protected <T> T min(@Nonnull final SelectListItem<T> col, final BooleanExpression... expr) {
+        return min(col, table(), expr);
+    }
+
+    /**
      * Returns a list of all values of the given select list item (for example: a column)
      * for a select on the table of this dao with the given expression as the where clause.
      */

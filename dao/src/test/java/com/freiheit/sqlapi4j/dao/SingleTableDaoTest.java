@@ -16,6 +16,7 @@
  */
 package com.freiheit.sqlapi4j.dao;
 
+import com.freiheit.sqlapi4j.query.SelectListItem;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -147,6 +148,30 @@ public class SingleTableDaoTest extends DaoTestBase {
     public void testAggregateEnum() {
         final List<Object> res = _personDao.findUnique(SQL.select( Sql.max( Person.GENDER)).from( Person.TABLE).where( Person.ID.gt(new PersonId(0L))));
         Assert.assertEquals(res, RESULT_AGGREGATE_ENUM);
+    }
+
+    @Test
+    public void testMax() {
+        final Integer maxHeight = _personDao.max(Person.HEIGTH);
+        Assert.assertEquals(maxHeight, Integer.valueOf(190));
+    }
+
+    @Test
+    public void testMaxWithNullResult() {
+        final String name = _personDao.max(Person.NAME, Person.NAME.eq("nonexistent"));
+        Assert.assertNull(name);
+    }
+
+    @Test
+    public void testMin() {
+        final Integer minHeight = _personDao.min(Person.HEIGTH);
+        Assert.assertEquals(minHeight, Integer.valueOf(158));
+    }
+
+    @Test
+    public void testMinWithNullResult() {
+        final String name = _personDao.min(Person.NAME, Person.NAME.eq("nonexistent"));
+        Assert.assertNull(name);
     }
 
 }

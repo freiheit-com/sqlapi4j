@@ -79,16 +79,18 @@ public abstract class AbstractDao {
     private static final class SelectListItemConverter<T> implements ResultTransformer<T> {
 
         @Nonnull private final SelectListItem<T> _col;
+        private final boolean _allowNull;
 
-        public SelectListItemConverter(final SelectListItem<T> col) {
+        public SelectListItemConverter(final SelectListItem<T> col, final boolean allowNull) {
             super();
             _col = col;
+            _allowNull = allowNull;
         }
 
         @Override
         public T apply(final SqlResultRow input) {
             final T ret = input.get(_col);
-            if (ret == null) {
+            if (ret == null && !_allowNull) {
                 throw new IllegalStateException("Result row converted to null: " + input.toString());
             }
             return ret;
@@ -217,6 +219,33 @@ public abstract class AbstractDao {
     }
 
     /**
+     * Get the maximum value of the given column for the given expression.
+     */
+    @CheckForNull
+    protected <T> T max(final SelectListItem<T> col, final TableDef table, final BooleanExpression... expr) {
+        return aggregate(Sql.max(col), table, expr);
+    }
+
+    /**
+     * Get the minimum value of the given column for the given expression.
+     */
+    @CheckForNull
+    protected <T> T min(final SelectListItem<T> col, final TableDef table, final BooleanExpression... expr) {
+        return aggregate(Sql.min(col), table, expr);
+    }
+
+    /**
+     * Get the aggregate value for the given aggregate column.
+     *
+     * Method signature does not really make sure you pass in an aggregate, so this should remain private and
+     * is only used to avoid code duplication.
+     */
+    @CheckForNull
+    private <T> T aggregate(final SelectListItem<T> aggCol, final TableDef table, final BooleanExpression... expr) {
+        return execute(new FindUnique<T>(new SelectListItemConverter<T>(aggCol, true), sql().select(aggCol).from(table).where(expr)));
+    }
+
+    /**
      * Get all values of the given Table by the id, converting the result with the converter function.
      */
     @Nonnull
@@ -245,7 +274,7 @@ public abstract class AbstractDao {
      */
     @Nonnull
     protected <T> List<T> findAll(@Nonnull final SelectListItem<T> col, @Nonnull final SelectCommand query) {
-        return execute(new Find<T>(new SelectListItemConverter<T>(col), query));
+        return execute(new Find<T>(new SelectListItemConverter<T>(col, false), query));
     }
 
     /**
@@ -332,7 +361,7 @@ public abstract class AbstractDao {
      */
     @CheckForNull
     protected <T> T findUnique(final SelectListItem<T> col, final LimitClause query) {
-        return execute(new FindUnique<T>(new SelectListItemConverter<T>(col), query));
+        return execute(new FindUnique<T>(new SelectListItemConverter<T>(col, false), query));
     }
 
     /**
@@ -340,7 +369,7 @@ public abstract class AbstractDao {
      */
     @Nonnull
     protected <T> T getUnique(final SelectListItem<T> col, final LimitClause query) {
-        return execute(new GetUnique<T>(new SelectListItemConverter<T>(col), query));
+        return execute(new GetUnique<T>(new SelectListItemConverter<T>(col, false), query));
     }
 
     /**
