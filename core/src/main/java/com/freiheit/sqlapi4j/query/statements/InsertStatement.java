@@ -33,6 +33,19 @@ import com.freiheit.sqlapi4j.query.FromDef;
  *
  */
 public interface InsertStatement {
+
+    /**
+     * The result of an insert statement.
+     *
+     * Will always include the number of rows inserted, and will
+     * probably include the generated Ids, if there were any.
+     */
+    public interface Result<I> {
+        int getNofRowsInserted();
+        List<I> getInsertedIds() throws UnsupportedOperationException;
+
+    }
+
     @Nonnull
     TableDef getTable();
 

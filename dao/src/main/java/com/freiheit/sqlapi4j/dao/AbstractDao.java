@@ -16,19 +16,6 @@
  */
 package com.freiheit.sqlapi4j.dao;
 
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.util.List;
-
-import javax.annotation.CheckForNull;
-import javax.annotation.Nonnegative;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import javax.annotation.ParametersAreNonnullByDefault;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.freiheit.sqlapi4j.dao.IntegrationCallbacks.Delete;
 import com.freiheit.sqlapi4j.dao.IntegrationCallbacks.Find;
 import com.freiheit.sqlapi4j.dao.IntegrationCallbacks.FindFirst;
@@ -36,6 +23,7 @@ import com.freiheit.sqlapi4j.dao.IntegrationCallbacks.FindUnique;
 import com.freiheit.sqlapi4j.dao.IntegrationCallbacks.GetUnique;
 import com.freiheit.sqlapi4j.dao.IntegrationCallbacks.Insert;
 import com.freiheit.sqlapi4j.dao.IntegrationCallbacks.InsertGenerateIds;
+import com.freiheit.sqlapi4j.dao.IntegrationCallbacks.InsertUsingAutoIncIds;
 import com.freiheit.sqlapi4j.dao.IntegrationCallbacks.SelectSequenceValue;
 import com.freiheit.sqlapi4j.dao.IntegrationCallbacks.SqlIntegrationCallback;
 import com.freiheit.sqlapi4j.dao.IntegrationCallbacks.Update;
@@ -61,6 +49,17 @@ import com.freiheit.sqlapi4j.query.clause.LimitClause;
 import com.freiheit.sqlapi4j.query.clause.LockMode;
 import com.freiheit.sqlapi4j.query.clause.WhereClause;
 import com.freiheit.sqlapi4j.query.impl.SqlBuilderImpl;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.annotation.CheckForNull;
+import javax.annotation.Nonnegative;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import javax.annotation.ParametersAreNonnullByDefault;
 
 /**
  * An abstract parent to daos significantly easing the use of the sqlapi.
@@ -80,16 +79,18 @@ public abstract class AbstractDao {
     private static final class SelectListItemConverter<T> implements ResultTransformer<T> {
 
         @Nonnull private final SelectListItem<T> _col;
+        private final boolean _allowNull;
 
-        public SelectListItemConverter(final SelectListItem<T> col) {
+        public SelectListItemConverter(final SelectListItem<T> col, final boolean allowNull) {
             super();
             _col = col;
+            _allowNull = allowNull;
         }
 
         @Override
         public T apply(final SqlResultRow input) {
             final T ret = input.get(_col);
-            if (ret == null) {
+            if (ret == null && !_allowNull) {
                 throw new IllegalStateException("Result row converted to null: " + input.toString());
             }
             return ret;
@@ -218,6 +219,33 @@ public abstract class AbstractDao {
     }
 
     /**
+     * Get the maximum value of the given column for the given expression.
+     */
+    @CheckForNull
+    protected <T> T max(final SelectListItem<T> col, final TableDef table, final BooleanExpression... expr) {
+        return aggregate(Sql.max(col), table, expr);
+    }
+
+    /**
+     * Get the minimum value of the given column for the given expression.
+     */
+    @CheckForNull
+    protected <T> T min(final SelectListItem<T> col, final TableDef table, final BooleanExpression... expr) {
+        return aggregate(Sql.min(col), table, expr);
+    }
+
+    /**
+     * Get the aggregate value for the given aggregate column.
+     *
+     * Method signature does not really make sure you pass in an aggregate, so this should remain private and
+     * is only used to avoid code duplication.
+     */
+    @CheckForNull
+    private <T> T aggregate(final SelectListItem<T> aggCol, final TableDef table, final BooleanExpression... expr) {
+        return execute(new FindUnique<T>(new SelectListItemConverter<T>(aggCol, true), sql().select(aggCol).from(table).where(expr)));
+    }
+
+    /**
      * Get all values of the given Table by the id, converting the result with the converter function.
      */
     @Nonnull
@@ -246,7 +274,7 @@ public abstract class AbstractDao {
      */
     @Nonnull
     protected <T> List<T> findAll(@Nonnull final SelectListItem<T> col, @Nonnull final SelectCommand query) {
-        return execute(new Find<T>(new SelectListItemConverter<T>(col), query));
+        return execute(new Find<T>(new SelectListItemConverter<T>(col, false), query));
     }
 
     /**
@@ -333,7 +361,7 @@ public abstract class AbstractDao {
      */
     @CheckForNull
     protected <T> T findUnique(final SelectListItem<T> col, final LimitClause query) {
-        return execute(new FindUnique<T>(new SelectListItemConverter<T>(col), query));
+        return execute(new FindUnique<T>(new SelectListItemConverter<T>(col, false), query));
     }
 
     /**
@@ -341,7 +369,7 @@ public abstract class AbstractDao {
      */
     @Nonnull
     protected <T> T getUnique(final SelectListItem<T> col, final LimitClause query) {
-        return execute(new GetUnique<T>(new SelectListItemConverter<T>(col), query));
+        return execute(new GetUnique<T>(new SelectListItemConverter<T>(col, false), query));
     }
 
     /**
@@ -357,6 +385,39 @@ public abstract class AbstractDao {
             throw new IllegalArgumentException("Insert produced " + r.size() + " results, expected " + 1);
         }
         return r.get(0);
+    }
+
+    /**
+     * Execute the Insert command and return the generated id.
+     *
+     * The given column definition has to auto-generate the ids (e.g. "AUTO_INCREMENT" in MySQL),
+     * otherwise an IllegalArgumentException will be thrown.
+     *
+     * <b>Note:</b> The type of idCol must have a converter to/from Long.
+     *
+     * @throws IllegalArgumentException if the insert command contains multiple rows
+     */
+    protected <I> I insertGenerateId(final ColumnDef<I> idCol, final InsertCommand cmd) {
+        final List<I> r = insertGenerateIds(idCol, cmd);
+        if (r.size() != 1) {
+            throw new IllegalArgumentException("Insert produced " + r.size() + " results, expected 1.");
+        }
+        return r.get(0);
+    }
+
+    /**
+     * Execute the Insert command and return the generated Ids.
+     *
+     * The given column definition has to auto-generate the ids (e.g. "AUTO_INCREMENT" in MySQL),
+     * otherwise an IllegalArgumentException will be thrown.
+     *
+     * The returned Ids will be in the same order as the calls to InsertCommand.values().
+     *
+     * <b>Note:</b> The type of idCol must have a converter to/from Long.
+     */
+    @Nonnull
+    protected <I> List<I> insertGenerateIds(final ColumnDef<I> idCol, final InsertCommand cmd) {
+        return execute(new InsertUsingAutoIncIds<I>(idCol, cmd));
     }
 
     /**

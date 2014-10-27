@@ -148,6 +148,35 @@ final class IntegrationCallbacks {
         }
     }
 
+    static final class InsertUsingAutoIncIds<I> implements SqlIntegrationCallback<List<I>> {
+
+        private final ColumnDef<I> _idCol;
+        private final InsertCommand _insertCommand;
+
+        protected InsertUsingAutoIncIds(
+            final ColumnDef<I> idCol,
+            final InsertCommand insertCommand
+        ) {
+            _idCol = idCol;
+            _insertCommand = insertCommand;
+        }
+
+        @Override
+        public List<I> execute(final SqlExecutor executor, final Connection connection) throws SQLException {
+            final InsertStatement stmt = _insertCommand.stmt();
+
+            final InsertStatement.Result<I> result = executor.execute(connection, stmt, _idCol);
+
+            // a rowcount != 1 is highly unlikely here, but better check:
+            if (result.getNofRowsInserted() == 0) {
+                LOGGER.warn("Failed to insert single row [" + this + "]: " + executor.render(stmt));
+                throw new EntityNotFoundException();
+            }
+
+            return result.getInsertedIds();
+        }
+    }
+
     static final class Delete implements SqlIntegrationCallback<Integer> {
 
         private final DeleteCommand _command;

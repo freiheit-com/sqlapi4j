@@ -130,6 +130,18 @@ public abstract class SingleTableDao<I, T> extends AbstractDao {
     }
 
     /**
+     * Insert an entity, setting the given column values.
+     *
+     * Only use this method, if the pkColumn is an auto-increment-column.
+     *
+     * @return the id of the inserted entity.
+     */
+    @Nonnull
+    protected I insert(final ColumnValueAssignment<?>... cols) {
+        return insertGenerateId(pkColumn(), sql().insert(table()).values(cols));
+    }
+
+    /**
      * Insert multiple entities, setting the given column values.
      *
      * Example Usage:
@@ -260,6 +272,22 @@ public abstract class SingleTableDao<I, T> extends AbstractDao {
     @Nonnegative
     protected int count(final BooleanExpression... expr) {
         return count(pkColumn(), table(), expr);
+    }
+
+    /**
+     * Get the maximum value of the given column for the given expression.
+     */
+    @CheckForNull
+    protected <T> T max(@Nonnull final SelectListItem<T> col, final BooleanExpression... expr) {
+        return max(col, table(), expr);
+    }
+
+    /**
+     * Get the minimum value of the given column for the given expression.
+     */
+    @CheckForNull
+    protected <T> T min(@Nonnull final SelectListItem<T> col, final BooleanExpression... expr) {
+        return min(col, table(), expr);
     }
 
     /**
