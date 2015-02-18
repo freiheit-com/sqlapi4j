@@ -32,16 +32,16 @@ import com.freiheit.sqlapi4j.query.FromDefVisitor;
 public class JoinDecl implements FromDef, OnPart {
 
     private final JoinType _joinType;
-	private final TableDef _table1;
+	private final FromDef _table1;
     private BooleanExpression _additionalExpr;
     private AbstractColumnDef<?> _column1;
-	private final TableDef _table2;
+	private final FromDef _table2;
 	private AbstractColumnDef<?> _column2;
 
     private JoinDecl(@Nonnull final JoinType joinType,
-	                 @Nonnull final TableDef table1,
+	                 @Nonnull final FromDef table1,
 	                 @Nullable final AbstractColumnDef<?> column1,
-	                 @Nullable final TableDef table2,
+	                 @Nullable final FromDef table2,
 	                 @Nullable final AbstractColumnDef<?> column2,
                      @Nullable final BooleanExpression additionalExpr) {
 		_joinType= joinType;
@@ -83,7 +83,7 @@ public class JoinDecl implements FromDef, OnPart {
 	}
 
 	@Nonnull
-    public TableDef getTable1() {
+    public FromDef getTable1() {
         return _table1;
     }
 
@@ -93,7 +93,7 @@ public class JoinDecl implements FromDef, OnPart {
     }
 
 	@Nullable
-    public TableDef getTable2() {
+    public FromDef getTable2() {
         return _table2;
     }
 
@@ -112,6 +112,7 @@ public class JoinDecl implements FromDef, OnPart {
         throw new UnsupportedOperationException("getTableName() not supported for JoinDecl.");
     }
 
+    @Override
     public <T> T accept(@Nonnull final FromDefVisitor<T> visitor) {
         return visitor.visit(this);
     }
