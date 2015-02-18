@@ -2,13 +2,13 @@
 /*/.classpath
 /*/.project
 /*/.settings/
-/*/target/
+/*/build/
 reports/
 .buildr.rb
+.gradle
 
 # IDEA generated project and module files
 *.iml
 *.ipr
 *.iws
 /*/*.iml
-
