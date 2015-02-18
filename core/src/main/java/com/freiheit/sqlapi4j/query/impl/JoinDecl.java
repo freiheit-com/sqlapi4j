@@ -53,7 +53,7 @@ public class JoinDecl implements FromDef, OnPart {
 	}
 
     @Nonnull
-    public static OnPart makeLeftOuterJoin(@Nonnull final TableDef left, @Nonnull final TableDef right) {
+    public static OnPart makeLeftOuterJoin(@Nonnull final FromDef left, @Nonnull final FromDef right) {
         if (left.equals(right)) {
             throw new IllegalArgumentException("self-joins are not yet supported and will result in runtime errors.");
         }
