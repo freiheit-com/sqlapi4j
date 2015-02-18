@@ -1,11 +1,11 @@
-description = "dao"
+description = "tx"
 
 dependencies {
     compile 'aopalliance:aopalliance:1.0'
 
-    //compile project(':core')
     compile project(':domain')
+}
 
-    //testCompile project(':core')
-    //testCompile project(':core').sourceSets.test.output
+jar {
+    baseName "sqlapi4j-tx"
 }

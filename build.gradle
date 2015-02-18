@@ -29,7 +29,9 @@ allprojects { project ->
 def javaProjects = [':core',
                     ':dao',
                     ':domain',
-                    ':tx'].collect { project it };
+                    ':tx',
+                    ':tx-guice'
+                    ].collect { project it };
 
 configure (javaProjects) {
     //apply plugin: 'checkstyle'

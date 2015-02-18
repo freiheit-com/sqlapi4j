@@ -3,3 +3,7 @@ description = "domain"
 dependencies {
     compile project(':core')
 }
+
+jar {
+    baseName "sqlapi4j-domain"
+}

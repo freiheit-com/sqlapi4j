@@ -7,3 +7,7 @@ dependencies {
     testCompile project(':core')
     testCompile project(':core').sourceSets.test.output
 }
+
+jar {
+    baseName "sqlapi4j-dao"
+}

@@ -1,1 +1,5 @@
 description = "core"
+
+jar {
+    baseName "sqlapi4j-core"
+}
