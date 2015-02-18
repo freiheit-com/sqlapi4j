@@ -1,0 +1,9 @@
+description = "dao"
+
+dependencies {
+    compile project(':core')
+    compile project(':domain')
+
+    testCompile project(':core')
+    testCompile project(':core').sourceSets.test.output
+}

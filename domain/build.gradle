@@ -1,0 +1,5 @@
+description = "domain"
+
+dependencies {
+    compile project(':core')
+}
