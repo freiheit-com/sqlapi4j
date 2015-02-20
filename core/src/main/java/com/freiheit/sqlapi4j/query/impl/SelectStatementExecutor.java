@@ -64,7 +64,7 @@ class SelectStatementExecutor extends AbstractQueryStatementExecutor<SelectState
 		final Statement stmt= conn.createStatement();
 		final ResultFlags resFlags= new ResultFlags();
 		final String sql= getGenerator().generateQueryString( getDialect(), statement, resFlags, PreparedStatementData.NO_PREPARED_STATEMENT);
-		LOG.debug("Executing plain SQL: " + sql);
+		LOG.debug("Executing plain SQL: {}", sql);
 		final ResultSet rs= stmt.executeQuery( sql);
 		return new SqlResultImpl( getDialect(), statement.getSelectItems(), rs, stmt);
 	}
@@ -75,7 +75,7 @@ class SelectStatementExecutor extends AbstractQueryStatementExecutor<SelectState
 		final PreparedStatementData preparedStatementData= new PreparedStatementData( true);
 		final String preparedStatement= getGenerator().generateQueryString( getDialect(), statement, resFlags, preparedStatementData);
 		//System.out.println( preparedStatement);
-		LOG.debug("Executing prepared stmt: " + preparedStatement);
+		LOG.debug("Executing prepared stmt: {}", preparedStatement);
 
 		final PreparedStatement pstmt= conn.prepareStatement( preparedStatement);
 		final Iterator<?> it= preparedStatementData.getValues();
