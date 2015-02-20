@@ -107,6 +107,7 @@ public class JoinDecl implements FromDef, OnPart {
         return _additionalExpr;
     }
 
+    @Override
     @Nonnull
     public String getTableName() {
         throw new UnsupportedOperationException("getTableName() not supported for JoinDecl.");

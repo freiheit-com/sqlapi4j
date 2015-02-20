@@ -1,0 +1,10 @@
+description = "tx-guice"
+
+dependencies {
+    compile project(':tx')
+    compile "com.google.inject:guice:3.0"
+}
+
+jar {
+    baseName "sqlapi4j-tx_guice"
+}

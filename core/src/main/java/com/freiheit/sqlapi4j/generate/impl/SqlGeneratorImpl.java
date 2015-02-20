@@ -170,6 +170,66 @@ public class SqlGeneratorImpl implements SqlGenerator {
         }
     }
 
+	private final class FromDefGenerator implements
+			FromDefVisitor<Void> {
+		private final StringBuilder sb;
+		private final SqlDialect dialect;
+		private final PreparedStatementData preparedStatementData;
+
+		private FromDefGenerator(
+				StringBuilder sb, 
+				SqlDialect dialect, 
+				PreparedStatementData preparedStatementData) {
+			this.sb = sb;
+			this.dialect = dialect;
+			this.preparedStatementData = preparedStatementData;
+		}
+
+		public Void visit(@Nonnull final TableDef tableDef) {
+		    sb.append( tableDef.getTableName());
+		    return null;
+		}
+
+		public Void visit(@Nonnull final JoinDecl joinDecl) {
+
+		    joinDecl.getTable1().accept(this);
+
+		    switch (joinDecl.getJoinType()) {
+		        case LEFT_OUTER_JOIN: dialect.addLeftOuterJoin(sb); break;
+		        case RIGHT_OUTER_JOIN: dialect.addRightOuterJoin(sb); break;
+		        case INNER_JOIN: dialect.addInnerJoin(sb); break;
+		        case FULL_OUTER_JOIN: dialect.addFullOuterJoin(sb); break;
+		        default: throw new UnsupportedOperationException();
+		    }
+
+		    joinDecl.getTable2().accept(this);
+
+		    dialect.addJoinOn(sb);
+
+		    final BooleanExpression simpleJoinExpr = eqForce(joinDecl.getColumn1(), joinDecl.getColumn2());
+		    final BooleanExpression joinExpr = joinDecl.getAdditionalExpr() == null
+		            ? simpleJoinExpr
+		            : Sql.and(simpleJoinExpr, joinDecl.getAdditionalExpr());
+
+		    joinExpr.accept(new BuildBooleanExpressionsClauseVisitor( preparedStatementData, sb, dialect));
+
+		    return null;
+		}
+
+		public Void visit(@Nonnull final TableAlias tableAlias) {
+		    sb.append( tableAlias.getTableName());
+		    return null;
+		}
+
+		/**
+		 * Force comparison of columns of unknown types.
+		 * TODO: Remove necessity to force the comparison.
+		 */
+		private <T> BooleanExpression eqForce(AbstractColumnDef col1, AbstractColumnDef col2) {
+		    return Sql.eq((AbstractColumnDef<T>)col1, (AbstractColumnDef<T>)col2);
+		}
+	}
+
 	/**
 	 * Note: This class is not static, because it needs to recurse into the SqlGenerator when creating subqueries.
 	 *
@@ -480,51 +540,7 @@ public class SqlGeneratorImpl implements SqlGenerator {
 		for( int i= 0; i < fromDefLength; ++i) {
 			final FromDef fromDef= fromDefs[i];
 
-            fromDef.accept(new FromDefVisitor<Void>() {
-                public Void visit(@Nonnull final TableDef tableDef) {
-                    sb.append( fromDef.getTableName());
-                    return null;
-                }
-
-                public Void visit(@Nonnull final JoinDecl joinDecl) {
-
-                    sb.append(joinDecl.getTable1().getTableName());
-
-                    switch (joinDecl.getJoinType()) {
-                        case LEFT_OUTER_JOIN: dialect.addLeftOuterJoin(sb); break;
-                        case RIGHT_OUTER_JOIN: dialect.addRightOuterJoin(sb); break;
-                        case INNER_JOIN: dialect.addInnerJoin(sb); break;
-                        case FULL_OUTER_JOIN: dialect.addFullOuterJoin(sb); break;
-                        default: throw new UnsupportedOperationException();
-                    }
-
-                    sb.append(joinDecl.getTable2().getTableName());
-                    dialect.addJoinOn(sb);
-
-                    final BooleanExpression simpleJoinExpr = eqForce(joinDecl.getColumn1(), joinDecl.getColumn2());
-                    final BooleanExpression joinExpr = joinDecl.getAdditionalExpr() == null
-                            ? simpleJoinExpr
-                            : Sql.and(simpleJoinExpr, joinDecl.getAdditionalExpr());
-
-                    joinExpr.accept(new BuildBooleanExpressionsClauseVisitor( preparedStatementData, sb, dialect));
-
-                    return null;
-                }
-
-                public Void visit(@Nonnull final TableAlias tableAlias) {
-                    sb.append( fromDef.getTableName());
-                    return null;
-                }
-
-                /**
-                 * Force comparison of columns of unknown types.
-                 * TODO: Remove necessity to force the comparison.
-                 */
-                private <T> BooleanExpression eqForce(AbstractColumnDef col1, AbstractColumnDef col2) {
-                    return Sql.eq((AbstractColumnDef<T>)col1, (AbstractColumnDef<T>)col2);
-                }
-            });
-
+            fromDef.accept(new FromDefGenerator(sb, dialect, preparedStatementData));
 
             if (i < fromDefLength - 1) {
                 dialect.addSelectListSeparator( sb);

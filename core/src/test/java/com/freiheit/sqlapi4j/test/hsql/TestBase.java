@@ -75,6 +75,7 @@ public class TestBase {
         TestDb.INSTANCE.setupDb();
         TestDb.INSTANCE.insertTestAddresses();
         TestDb.INSTANCE.insertTestPersons();
+        TestDb.INSTANCE.insertTestCats();
     }
 
     @AfterClass
