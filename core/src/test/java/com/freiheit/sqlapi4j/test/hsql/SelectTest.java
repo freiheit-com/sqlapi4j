@@ -23,12 +23,16 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.freiheit.sqlapi4j.meta.TableAlias;
+import com.freiheit.sqlapi4j.query.FromDef;
 import com.freiheit.sqlapi4j.query.SelectResult;
 import com.freiheit.sqlapi4j.query.SelectSequenceCommand;
 import com.freiheit.sqlapi4j.query.Sql;
 import com.freiheit.sqlapi4j.query.SqlCommand;
+import com.freiheit.sqlapi4j.query.impl.JoinDecl;
+import com.freiheit.sqlapi4j.query.impl.OnPart;
 import com.freiheit.sqlapi4j.query.statements.SelectStatement;
 import com.freiheit.sqlapi4j.test.hsql.TestDb.Address;
+import com.freiheit.sqlapi4j.test.hsql.TestDb.Cat;
 import com.freiheit.sqlapi4j.test.hsql.TestDb.DbOperation;
 import com.freiheit.sqlapi4j.test.hsql.TestDb.Gender;
 import com.freiheit.sqlapi4j.test.hsql.TestDb.Person;
@@ -39,6 +43,7 @@ public class SelectTest extends TestBase {
 	private static Object[][] RESULT_JOIN= new Object[][] { { "Berlin" } };
 	private static Object[][] RESULT_LEFT_OUTER_JOIN= new Object[][] { { "Berlin", "Berlin" }, { "David", null }, { "Ford", null }, { "Hans", null }, { "Harry", null }, {"Hummel", null }, { "Mary", null }, { "Paul", null }, { "Peter", null } };
 	private static Object[][] RESULT_LEFT_OUTER_JOIN_WITH_ADDITIONAL_EXPR = new Object[][] { { "Berlin", null }, { "David", null }, { "Ford", null }, { "Hans", null }, { "Harry", null }, {"Hummel", null }, { "Mary", null }, { "Paul", null }, { "Peter", null } };
+	private static Object[][] RESULT_MULTI_JOIN= new Object[][] { { "Berlin", "Berlin", null }, { "David", null, null }, { "Ford", null, null }, { "Hans", null, null }, { "Harry", null, null }, {"Hummel", null, null }, { "Mary", null, null }, { "Paul", null, null }, { "Peter", null, "Nyan" } };
 	private static Object[][] RESULT_NOT_SINGLE= new Object[][] { { "Peter" }, { "Paul" }, { "Mary" }, { "Hans" }, { "Harry" }, { "Berlin" }, {"David"}};
 	//{ "Ford" },
 
@@ -376,6 +381,27 @@ public class SelectTest extends TestBase {
 		});
 	}
 
+	@Test
+	public void testMultiJoin() {
+		FromDef join1 = Person.TABLE.leftOuterJoin(Address.TABLE).on(Person.NAME, Address.CITY);
+		FromDef join2 = JoinDecl.makeLeftOuterJoin(join1, Cat.TABLE).on(Person.ID, Cat.HOLDER_ID);
+		final SqlCommand<SelectStatement> query =
+                SQL.select( Person.NAME, Address.CITY, Cat.NAME)
+                   .from( join2)
+                   .orderBy(Person.NAME);
+
+        System.out.println( EXEC.render(query.stmt()));
+
+		TestDb.INSTANCE.executeSingle( new DbOperation<Void>() {
+			@Override
+			public Void execute( final Connection c) throws SQLException {
+				final SelectResult res= executeQuery(c, query);
+				assertResultSet( res, RESULT_MULTI_JOIN, "left-outer-join-result");
+                return null;
+			}
+		});
+	}
+	
 	@Test
 	public void testNotEqualsSelectSingleResult() {
 		final SqlCommand<SelectStatement> query= SQL.select( Person.NAME).from( Person.TABLE).where( Person.LASTNAME.neq( "Prefect")).orderBy( Person.ID);

@@ -57,7 +57,8 @@ public class TestDb {
 	private static final String PERSON_DROP_SEQUENCE_STR= "drop sequence person_seq";
 	protected static final String PERSON_INSERT_STR= "insert into person ( id, name, lastname, height, birth_date, gender) values (?,?,?,?,?,?);";
 
-	private static final String CAT_DDL_STR= "create table cat ( id integer not null auto_increment primary key, name varchar);";
+	private static final String CAT_DDL_STR= "create table cat ( id integer not null auto_increment primary key, name varchar, holder integer);";
+	protected static final String CAT_INSERT_STR= "insert into cat ( id, name, holder) values (?,?,?);";
 	private static final String CAT_DROP_STR= "drop table cat";
 
 	public static enum Gender {
@@ -106,8 +107,9 @@ public class TestDb {
 
         public static final ColumnDef<Long>           ID   = ColumnDefs.longT("id");
         public static final ColumnDefNullable<String> NAME = ColumnDefs.varcharNullable( "name");
+        public static final ColumnDef<Long>      HOLDER_ID = ColumnDefs.longT("holder");
 
-        public static final TableDef TABLE = new TableDef( "cat", ID, NAME);
+        public static final TableDef TABLE = new TableDef( "cat", ID, NAME, HOLDER_ID);
     }
 
     public TestDb() {
@@ -196,6 +198,25 @@ public class TestDb {
 				ps.setInt( 4, height);
 				ps.setTimestamp( 5, new Timestamp( birthDate.getTime()));
 				ps.setString( 6, gender.name());
+				ps.execute();
+				return null;
+			}
+		});
+	}
+	
+	public void insertTestCats() {
+		insertCat(1, "Nyan", 1);
+	}
+
+	protected void insertCat( final long id, final String name, final int holder) {
+		executeSingle( new DbOperation<Void>() {
+			@Override
+			public Void execute( final Connection c) throws SQLException {
+				final PreparedStatement ps= c.prepareStatement( CAT_INSERT_STR);
+				ps.setLong( 1, id);
+				ps.setString( 2, name);
+				ps.setInt( 3, holder);
+
 				ps.execute();
 				return null;
 			}
