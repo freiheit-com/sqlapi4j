@@ -1,6 +1,6 @@
 apply plugin: 'base'
 
-def VERSION = '0.2.2'
+def VERSION = '0.2.3-SNAPSHOT'
 
 allprojects { project ->
 
