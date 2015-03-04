@@ -37,6 +37,7 @@ import com.freiheit.sqlapi4j.meta.TableDef;
 import com.freiheit.sqlapi4j.query.BooleanExpression;
 import com.freiheit.sqlapi4j.query.DeleteCommand;
 import com.freiheit.sqlapi4j.query.InsertCommand;
+import com.freiheit.sqlapi4j.query.OrderItem;
 import com.freiheit.sqlapi4j.query.SelectCommand;
 import com.freiheit.sqlapi4j.query.SelectListItem;
 import com.freiheit.sqlapi4j.query.SelectSequenceCommand;
@@ -200,7 +201,7 @@ public abstract class AbstractDao {
     protected <T> List<T> findWithLimitAndOffset(
         final ResultTransformer<T> converter,
         final TableDef table,
-        final SelectListItem<?> order,
+        final OrderItem order,
         @Nonnegative final int offset,
         @Nonnegative final int limit,
         final BooleanExpression... expr
