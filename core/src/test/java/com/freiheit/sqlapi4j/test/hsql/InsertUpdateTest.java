@@ -131,7 +131,8 @@ public class InsertUpdateTest extends TestBase {
 
     @Test
     public void testInsertWithAutoIncrementCol() throws SQLException {
-        final SqlCommand<InsertStatement> insert= SQL.insert(TestDb.Cat.TABLE).values(TestDb.Cat.ID.set(1l), TestDb.Cat.NAME.set("Garfield"));
+        final SqlCommand<InsertStatement> insert= SQL.insert(TestDb.Cat.TABLE).values( //TestDb.Cat.ID.set(1l),
+                TestDb.Cat.NAME.set("Garfield"));
 
         System.out.println( EXEC.render(insert.stmt()));
 

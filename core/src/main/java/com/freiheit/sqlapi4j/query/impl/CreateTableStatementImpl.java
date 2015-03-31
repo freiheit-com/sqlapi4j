@@ -33,4 +33,10 @@ public final class CreateTableStatementImpl implements CreateTableStatement {
     public TableDef getTable() {
         return _table;
     }
+
+    @Override
+    public String toString() {
+        return "CreateTableStatementImpl " + _table.getTableName();
+    }
+    
 }
