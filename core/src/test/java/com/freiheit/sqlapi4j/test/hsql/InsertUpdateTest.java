@@ -22,6 +22,10 @@ import java.sql.SQLException;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import com.freiheit.sqlapi4j.meta.ColumnDefNullable;
+import com.freiheit.sqlapi4j.meta.ColumnDefs;
+import com.freiheit.sqlapi4j.meta.SequenceDef;
+import com.freiheit.sqlapi4j.meta.TableDef;
 import com.freiheit.sqlapi4j.query.InsertCommand;
 import com.freiheit.sqlapi4j.query.SelectResult;
 import com.freiheit.sqlapi4j.query.SqlCommand;
@@ -142,6 +146,32 @@ public class InsertUpdateTest extends TestBase {
                 return null;
             }
         });
+    }
+    
+    @Test
+    public void testDoubleRowSameTypes() throws Exception {
+        final String name = "nonUniqueName";
+        final ColumnDefNullable<String> STRING1= ColumnDefs.varcharNullable( name);
+        final ColumnDefNullable<String> STRING2= ColumnDefs.varcharNullable( name);
+        try {
+            new TableDef( "doubleTableSameTypes", STRING1, STRING2);
+            Assert.fail("expected exception");
+        } catch (IllegalArgumentException e) {
+            // expected!
+        }
+    }
+
+    @Test
+    public void testDoubleRowDifferentTypes() throws Exception {
+        final String name = "nonUniqueName";
+        final ColumnDefNullable<String> STRING1= ColumnDefs.varcharNullable( name);
+        final ColumnDefNullable<Country> ENUM1= ColumnDefs.enumTypeNullable( name, Country.class);
+        try {
+            new TableDef( "doubleTableDiffTypes", STRING1, ENUM1);
+            Assert.fail("expected exception");
+        } catch (IllegalArgumentException e) {
+            // expected!
+        }
     }
 
     private static InsertCommand insertAddress( final long id, final String city, final String street, final int num, final String zip, final Country country) {

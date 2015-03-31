@@ -16,17 +16,19 @@
  */
 package com.freiheit.sqlapi4j.meta;
 
-import com.freiheit.sqlapi4j.generate.SqlDialect;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import javax.annotation.Nonnull;
+import javax.annotation.ParametersAreNonnullByDefault;
+
 import com.freiheit.sqlapi4j.query.FromDef;
 import com.freiheit.sqlapi4j.query.FromDefVisitor;
 import com.freiheit.sqlapi4j.query.impl.JoinDecl;
 import com.freiheit.sqlapi4j.query.impl.OnPart;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import javax.annotation.Nonnull;
-import javax.annotation.ParametersAreNonnullByDefault;
 
 /**
  * Metadata for a database table.
@@ -58,9 +60,10 @@ public class TableDef implements FromDef {
 			_colIndizes.put( col, Integer.valueOf( i));
 			++i;
 		}
+        validateColumnNames();
 	}
 
-	/**
+    /**
 	 * @param tableName the table name
 	 * @param cols the table's column definitions
 	 */
@@ -76,7 +79,19 @@ public class TableDef implements FromDef {
 			_colIndizes.put( col, Integer.valueOf( i));
 			++i;
 		}
+        validateColumnNames();
 	}
+
+    private void validateColumnNames() {
+        final Set<String> names = new HashSet<String>();
+        for (final AbstractColumnDef<?> col : _columns) {
+            final String name = col.fqName();
+            if (names.contains(name)) {
+                throw new IllegalArgumentException("column name '" + name + "' is not unique in table '" + _tableName + "'!");
+            }
+            names.add(name);
+        }
+    }
 
 	/**
 	 * Get all columns.
