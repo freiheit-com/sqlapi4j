@@ -12,3 +12,5 @@ reports/
 *.ipr
 *.iws
 /*/*.iml
+/bin
+
