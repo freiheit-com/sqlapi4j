@@ -257,6 +257,33 @@ dao.sql().select(Sql.count(DetailsTable.ID))
          .where(PersonTable.AGE.isNull());
 --------------------------------------------------------------------------------
 
+- multiple joins are also possible
+
+
+.SQL:
+--------------------------------------------------------------------------------
+SELECT count(d.id), count (a.id) FROM person p LEFT OUTER JOIN details d
+                                                    ON d.person_id = p.id
+                                               LEFT OUTER JOIN adress a
+                                                    ON a.detail_id = d.id
+                   WHERE p.age IS NULL;
+--------------------------------------------------------------------------------
+
+.SQLAPI:
+--------------------------------------------------------------------------------
+final FromDef firstJoin =
+  PersonTable.TABLE.leftOuterJoin(DetailsTable.TABLE)
+                   .on(PersonTable.ID, DetailsTable.PERSON_ID);
+final FromDef join =
+  JoinDecl.makeLeftOuterJoin(firstJoin, AdressTable.TABLE)
+          .on(DetailsTable.ID, AdressTable.DETAILS_ID);
+
+dao.sql().select(Sql.count(DetailsTable.ID), Sql.count(AdressTable.ID))
+         .from(join)
+         .where(PersonTable.AGE.isNull());
+--------------------------------------------------------------------------------
+
+
 
 UPDATE
 ------
