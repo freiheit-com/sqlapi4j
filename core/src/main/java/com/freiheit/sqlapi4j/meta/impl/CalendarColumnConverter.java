@@ -16,7 +16,7 @@
  */
 package com.freiheit.sqlapi4j.meta.impl;
 
-import java.sql.Date;
+import java.util.Date;
 import java.sql.Timestamp;
 import java.sql.Types;
 import java.util.Calendar;
@@ -40,6 +40,10 @@ public class CalendarColumnConverter implements ColumnConverter<Calendar,java.ut
 
 	@Override
 	public Calendar fromDb( java.util.Date value, DbType<Calendar> dbType) {
+	    if (value == null) {
+	        return null;
+	    }
+	    
 		Calendar res= Calendar.getInstance();
 		res.setTimeInMillis( value.getTime());
 		return res;
