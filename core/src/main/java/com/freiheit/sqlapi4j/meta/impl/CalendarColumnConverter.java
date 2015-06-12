@@ -56,6 +56,11 @@ public class CalendarColumnConverter implements ColumnConverter<Calendar,java.ut
 
 	@Override
 	public java.util.Date toDb( Calendar value, DbType<Calendar> dbType) {
+	    
+	    if (value == null) {
+	        return null;
+	    }
+	    
 		switch( _sqlType) {
 		case Types.TIMESTAMP:
 			return new Timestamp( value.getTimeInMillis());
